@@ -1,5 +1,7 @@
 # PowerPlatform-Approvals
 
+Git repository root is this folder (on disk it may live under a parent named **Power Platform**). The solution name remains **PowerPlatform-Approvals**.
+
 This project is a beginner-friendly starter for building a Microsoft Power Platform solution with:
 
 - `Power Apps` for the user-facing app
@@ -25,6 +27,7 @@ Build a simple approval app where a user:
 - `docs/power-automate-approval-flow.md`: step-by-step flow build guide
 - `docs/power-apps-canvas-app.md`: step-by-step canvas app build guide
 - `docs/sap-business-one-discovery.md`: second-phase SAP integration paths and questions
+- `artifacts/`: solution exports and optional unpacked metadata; see `artifacts/README.md` for naming and git rules
 
 ## Build order
 
@@ -47,4 +50,4 @@ You should end with:
 ## Notes
 
 - Do not store passwords, connection secrets, or tenant-only sensitive URLs in this repo.
-- If your company later adopts `Solutions` and `PAC CLI`, add those exports or source files in a separate folder rather than mixing them into the starter docs.
+- Solution exports and PAC unpack output live under `artifacts/` (not inside `docs/`). Follow `artifacts/README.md` for filenames and review workflow.
