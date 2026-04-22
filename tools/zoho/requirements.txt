@@ -1,0 +1,2 @@
+# Zoho API helpers — install: pip install -r requirements.txt
+requests>=2.28.0

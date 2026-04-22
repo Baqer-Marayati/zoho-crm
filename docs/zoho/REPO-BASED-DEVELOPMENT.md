@@ -14,7 +14,7 @@
 
 1. **Change design** in a doc or a PR (field list, pipeline stages, new automation rule in plain language).
 2. **Implement in Zoho** (admin) or **in a script** in this repo.
-3. If **scripted**, run it locally: `source .env && python tools/zoho/...` (exact commands to be added with each script).
+3. If **scripted**, run it locally from `tools/zoho/` (see [DEVELOPER.md](./DEVELOPER.md)) — e.g. `./venv/bin/python your_script.py` with `.env` present.
 4. **Test** in a Zoho **sandbox** if your plan includes one, or in a limited pilot in production (your risk call).
 5. **Document** the outcome in `../PROJECT-STATUS.md`.
 

@@ -1,7 +1,7 @@
 .DS_Store
 **/.DS_Store
 
-# Local clones / reference upstream repos (not part of the active solution)
+# Local-only heavy clones (e.g. upstream SDK or sample repos) — do not re-add
 _reference/
 _build/
 
@@ -9,8 +9,9 @@ _build/
 .env
 **/.env
 !**/.env.example
-tools/**/.token_cache.json
 **/.token_cache.json
+**/*.token.json
+tools/zoho/.token*
 *.pem
 
 # Python
@@ -18,10 +19,4 @@ tools/**/.token_cache.json
 **/__pycache__/
 *.pyc
 .pytest_cache/
-
-# Legacy / archived (if reintroduced) — build and local tooling
-solutions/**/bin/
-solutions/**/obj/
-archive/**/solutions/**/bin/
-archive/**/solutions/**/obj/
-archive/**/tools/**/venv/
+.mypy_cache/

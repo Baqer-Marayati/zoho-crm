@@ -1,36 +1,26 @@
-# Zoho CRM (with Power BI) — project monorepo
+# Zoho CRM + Power BI — monorepo
 
-This repository is the **working home** for a **Zoho CRM Professional**–based sales stack: lead-to-deal pipeline, quotes and product library, and **Power BI** reporting for management. The goal is to keep **automation, scripts, and documentation in Git** while Zoho and Microsoft remain the live systems of record.
+This repository holds **docs and automation** for a **Zoho CRM Professional** sales stack: pipeline, quotes, product library, and **Power BI** reporting. Zoho and Microsoft 365 are the live systems; this folder is the **versioned** companion (scripts, env templates, and playbooks).
 
-## What lives here
+## Layout
 
 | Path | Purpose |
 |------|--------|
-| `docs/zoho/` | Zoho and Power BI playbooks, architecture, and repo workflow |
-| `docs/PROJECT-STATUS.md` | Current phase, scope, and decisions (keep this current) |
-| `tools/zoho/` | API helpers and integration scripts (OAuth, data sync) — *to be added as you build* |
-| `artifacts/` | Optional exports and snapshots; **no secrets** (see `artifacts/README.md`) |
-| `archive/` | Deprecated Microsoft / Dataverse / canvas experiments — **read-only history** |
+| `docs/zoho/` | Zoho and Power BI playbooks, architecture, developer workflow |
+| `docs/PROJECT-STATUS.md` | Current scope and next steps — update as you go |
+| `tools/zoho/` | Python (or other) **API** helpers — OAuth, sync, one-off tools |
+| `artifacts/zoho/` | Optional **non-secret** exports (CSV schema snapshots, PDF samples, etc.) |
 
-## What does *not* live here
+## Quick start (developer)
 
-- Your Zoho **login** and **refresh tokens** (use env vars, never commit; see `tools/zoho/.env.example`).
-- A full 1:1 “clone” of the Zoho org as code. Zoho is configured in the product; this repo holds **automation, specs, and copies** of scripts.
+1. Read `docs/zoho/DEVELOPER.md` and `docs/zoho/GETTING-STARTED.md`.
+2. In `tools/zoho/`, copy `.env.example` to `.env` (not committed) after you have Zoho OAuth values.
+3. `make venv` (creates `tools/zoho/venv` and installs `tools/zoho/requirements.txt`), or the same `pip` commands in `docs/zoho/DEVELOPER.md`.
 
-## First steps
+## Secrets
 
-1. Read `docs/zoho/GETTING-STARTED.md`.
-2. Skim `docs/PROJECT-STATUS.md` and adjust scope for your org.
-3. When scripts exist, copy `tools/zoho/.env.example` to `.env` (gitignored) and run scripts locally or in CI.
+Never commit real tokens. Use `tools/zoho/.env` locally with `chmod 600 .env` on macOS/Linux.
 
-## Renaming the folder on disk (optional)
+## Remote
 
-The Git remote name and this README use **Zoho CRM** as the product name. If your local folder is still named `Power Platform`, you can rename the parent directory in Finder, or from the **Microsoft Platform** parent folder run:
-
-`mv "Power Platform" "Zoho-CRM"`
-
-Re-open the project in your editor after renaming.
-
-## Legacy material
-
-The original **Power Platform approvals starter** and the **Dataverse / canvas** experiments are under `archive/`. They are not part of the active Zoho plan unless you explicitly revive them.
+The Git **remote** URL does not have to match the folder name. This project is the **Zoho CRM** work tree on disk (e.g. `…/Zoho-CRM`).

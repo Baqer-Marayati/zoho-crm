@@ -1,27 +1,28 @@
-# Zoho API helpers (placeholder)
+# `tools/zoho` — Zoho CRM API automation
 
-Add scripts here for:
+Add **small, focused** scripts here: OAuth test, bulk import, health checks, webhooks, or one-off data fixes.
 
-- **OAuth** token health checks
-- **Bulk import** of leads, products, or attachments
-- **Scheduled** sync or backup jobs (if you outgrow Zoho’s built-in options)
-
-## Setup (when scripts exist)
+## Setup
 
 ```bash
 cd tools/zoho
+cp .env.example .env
+# edit .env with your OAuth client + refresh token (never commit)
+chmod 600 .env
 python3 -m venv venv
-./venv/bin/pip install --upgrade pip
-# ./venv/bin/pip install -r requirements.txt
+./venv/bin/pip install -r requirements.txt
 ```
 
-## Secrets
+## Running
 
-- Copy `.env.example` to `.env` in **this directory** (or repo root) and add real values.
-- `chmod 600 .env` on Unix-like systems.
-- **Never** commit `.env` or real tokens.
+```bash
+# Example once you add a script:
+# ./venv/bin/python hello_zoho.py
+```
 
-## Related documentation
+## Documentation
 
-- `../../docs/zoho/GETTING-STARTED.md`
-- `../../docs/zoho/REPO-BASED-DEVELOPMENT.md`
+- `../../docs/zoho/DEVELOPER.md` — repo workflow
+- `../../docs/zoho/GETTING-STARTED.md` — Zoho API Console and scopes
+
+Zoho’s official **CRM API v2** docs: use the current URL for your data center (`.com` / `.eu` / etc.) from [Zoho’s developer site](https://www.zoho.com/crm/developer/docs/api/v2/).

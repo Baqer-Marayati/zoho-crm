@@ -11,7 +11,7 @@ Zoho’s CRM API uses **OAuth 2.0** (not a long-lived “API key” in the old s
 
 1. In [Zoho API Console](https://api-console.zoho.com/) create a **Self Client** or **Server-based** app as documented for your region and product.
 2. Create scopes for **Zoho CRM** (e.g. `ZohoCRM.modules.ALL` or the minimal scopes you need — tighten in production).
-3. Complete the **one-time** grant to obtain a **refresh token**; store it in `.env` on your machine (see `../../tools/zoho/.env.example`).
+3. Complete the **one-time** grant to obtain a **refresh token**; store it in `tools/zoho/.env` on your machine (copy from `tools/zoho/.env.example`).
 4. Never commit tokens or client secrets. Rotate if any secret was pasted into chat or a public log.
 
 *Exact menu names can change; follow the official Zoho CRM API authentication guide for your data center (`.com` vs `.eu` vs others).*

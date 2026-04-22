@@ -1,20 +1,14 @@
-# Artifacts (optional exports)
+# Artifacts (optional, non-secret)
 
-Place **versioned, non-secret** exports here when you need an audit trail or restore point. This repo is **Zoho + Power BI**–first; Microsoft solution exports are **optional** and mostly historical.
-
-## Folders
+Store **redacted** exports you want in version control: field lists, sample CSVs, **screenshot PDFs of quote layouts** (no customer PII), or other documentation aids.
 
 | Folder | Use |
 |--------|--------|
-| `solutions/` | **Microsoft** Dataverse / Power Platform solution `.zip` exports (only if you still use or archive them) |
-| `metadata/` | Unpacked or diff-friendly metadata (e.g. `pac solution unpack` output) |
-| `zoho/` *(create if needed)* | Zoho-originated **documentation exports**, CSV schema snapshots, or other **non-secret** dumps you want in git (never raw OAuth tokens) |
+| `zoho/` | Zoho-related snapshots (e.g. schema exports, **scrubbed** data samples) |
 
 ## Rules
 
-- **No secrets** — scrub connection strings, client secrets, refresh tokens, and tenant-only URLs before committing.
-- **Naming** — use a consistent stem so files sort in time order, e.g. `{env}-{YYYY-MM-DD}-{label}`.
+- **No** OAuth tokens, **no** `client_secret`, **no** live customer records unless policy allows and data is **anonymized**.
+- Prefer **one folder per “drop”** with a clear date: `zoho/2026-04-22-field-dictionary/…`
 
-## Git workflow
-
-Prefer pull requests for anything that changes `artifacts/`, so someone scans filenames and that nothing sensitive slipped in.
+Pull requests for changes under `artifacts/` should get a quick human review.
