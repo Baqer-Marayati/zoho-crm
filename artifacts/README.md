@@ -1,37 +1,20 @@
-# Artifacts
+# Artifacts (optional exports)
 
-Place **exported solutions** and optional **unpacked metadata** here. Keep **secrets out of git** (connection references, passwords, tenant-only URLs); scrub or use environment-specific settings before committing.
+Place **versioned, non-secret** exports here when you need an audit trail or restore point. This repo is **Zoho + Power BI**–first; Microsoft solution exports are **optional** and mostly historical.
 
 ## Folders
 
 | Folder | Use |
-|--------|-----|
-| `solutions/` | Solution `.zip` exports (portal **Export** or **PAC**). |
-| `metadata/` | Optional unpacked solution or source for diff/review (e.g. `pac solution unpack`). |
+|--------|--------|
+| `solutions/` | **Microsoft** Dataverse / Power Platform solution `.zip` exports (only if you still use or archive them) |
+| `metadata/` | Unpacked or diff-friendly metadata (e.g. `pac solution unpack` output) |
+| `zoho/` *(create if needed)* | Zoho-originated **documentation exports**, CSV schema snapshots, or other **non-secret** dumps you want in git (never raw OAuth tokens) |
 
-## Naming (required)
+## Rules
 
-Use a single pattern so exports sort chronologically and stay identifiable:
+- **No secrets** — scrub connection strings, client secrets, refresh tokens, and tenant-only URLs before committing.
+- **Naming** — use a consistent stem so files sort in time order, e.g. `{env}-{YYYY-MM-DD}-{label}`.
 
-```text
-{environment}-{YYYY-MM-DD}-{version}-{managed|unmanaged}.zip
-```
+## Git workflow
 
-**Examples**
-
-- `dev-2026-04-21-v1-unmanaged.zip`
-- `test-2026-04-22-v2-managed.zip`
-
-**Parts**
-
-- **environment** — short label (`dev`, `test`, `prod`, or your tenant/env code).
-- **date** — export day (UTC or local, but stay consistent).
-- **version** — `v1`, `v2`, … or semver if you prefer.
-- **managed \| unmanaged** — matches the export type.
-
-For unpacked folders under `metadata/`, mirror the same stem as a directory name, e.g. `dev-2026-04-21-v1-unmanaged/`.
-
-## Git workflow (strict)
-
-- Prefer merging changes under `artifacts/` via **pull request** so filenames and contents get a quick review.
-- Optional: use a branch such as `exports/dev` for frequent drops, then open a PR to `main` when a snapshot is “canonical.”
+Prefer pull requests for anything that changes `artifacts/`, so someone scans filenames and that nothing sensitive slipped in.

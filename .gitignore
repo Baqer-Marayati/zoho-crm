@@ -1,2 +1,27 @@
 .DS_Store
 **/.DS_Store
+
+# Local clones / reference upstream repos (not part of the active solution)
+_reference/
+_build/
+
+# Secrets — never commit
+.env
+**/.env
+!**/.env.example
+tools/**/.token_cache.json
+**/.token_cache.json
+*.pem
+
+# Python
+**/venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Legacy / archived (if reintroduced) — build and local tooling
+solutions/**/bin/
+solutions/**/obj/
+archive/**/solutions/**/bin/
+archive/**/solutions/**/obj/
+archive/**/tools/**/venv/

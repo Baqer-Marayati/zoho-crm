@@ -1,53 +1,36 @@
-# PowerPlatform-Approvals
+# Zoho CRM (with Power BI) — project monorepo
 
-Git repository root is this folder (on disk it may live under a parent named **Power Platform**). The solution name remains **PowerPlatform-Approvals**.
+This repository is the **working home** for a **Zoho CRM Professional**–based sales stack: lead-to-deal pipeline, quotes and product library, and **Power BI** reporting for management. The goal is to keep **automation, scripts, and documentation in Git** while Zoho and Microsoft remain the live systems of record.
 
-This project is a beginner-friendly starter for building a Microsoft Power Platform solution with:
+## What lives here
 
-- `Power Apps` for the user-facing app
-- `Power Automate` for approvals and notifications
-- `SharePoint` for the first datastore
+| Path | Purpose |
+|------|--------|
+| `docs/zoho/` | Zoho and Power BI playbooks, architecture, and repo workflow |
+| `docs/PROJECT-STATUS.md` | Current phase, scope, and decisions (keep this current) |
+| `tools/zoho/` | API helpers and integration scripts (OAuth, data sync) — *to be added as you build* |
+| `artifacts/` | Optional exports and snapshots; **no secrets** (see `artifacts/README.md`) |
+| `archive/` | Deprecated Microsoft / Dataverse / canvas experiments — **read-only history** |
 
-The first version deliberately avoids direct `SAP Business One` integration. The goal is to learn the core Microsoft pattern first, then add SAP safely once the technical access path is confirmed.
+## What does *not* live here
 
-## First project
+- Your Zoho **login** and **refresh tokens** (use env vars, never commit; see `tools/zoho/.env.example`).
+- A full 1:1 “clone” of the Zoho org as code. Zoho is configured in the product; this repo holds **automation, specs, and copies** of scripts.
 
-Build a simple approval app where a user:
+## First steps
 
-1. submits a request from a canvas app
-2. creates a new item in a SharePoint list
-3. triggers a Power Automate approval flow
-4. receives the approval result by email or Teams
+1. Read `docs/zoho/GETTING-STARTED.md`.
+2. Skim `docs/PROJECT-STATUS.md` and adjust scope for your org.
+3. When scripts exist, copy `tools/zoho/.env.example` to `.env` (gitignored) and run scripts locally or in CI.
 
-## Project structure
+## Renaming the folder on disk (optional)
 
-- `docs/overview.md`: architecture, scope, and delivery order
-- `docs/setup-checklist.md`: tenant, environment, permissions, and setup checklist
-- `docs/sharepoint-list-schema.md`: first SharePoint list design
-- `docs/power-automate-approval-flow.md`: step-by-step flow build guide
-- `docs/power-apps-canvas-app.md`: step-by-step canvas app build guide
-- `docs/sap-business-one-discovery.md`: second-phase SAP integration paths and questions
-- `artifacts/`: solution exports and optional unpacked metadata; see `artifacts/README.md` for naming and git rules
+The Git remote name and this README use **Zoho CRM** as the product name. If your local folder is still named `Power Platform`, you can rename the parent directory in Finder, or from the **Microsoft Platform** parent folder run:
 
-## Build order
+`mv "Power Platform" "Zoho-CRM"`
 
-1. Confirm you can access Power Apps, Power Automate, and SharePoint.
-2. Create the SharePoint list.
-3. Build and test the approval flow.
-4. Build the canvas app against the same list.
-5. Test the full loop end to end.
-6. Start SAP discovery only after the first version is working.
+Re-open the project in your editor after renaming.
 
-## Success criteria
+## Legacy material
 
-You should end with:
-
-- one working Power Apps canvas app
-- one working Power Automate approval flow
-- one SharePoint list storing the requests
-- one documented path for future SAP Business One integration
-
-## Notes
-
-- Do not store passwords, connection secrets, or tenant-only sensitive URLs in this repo.
-- Solution exports and PAC unpack output live under `artifacts/` (not inside `docs/`). Follow `artifacts/README.md` for filenames and review workflow.
+The original **Power Platform approvals starter** and the **Dataverse / canvas** experiments are under `archive/`. They are not part of the active Zoho plan unless you explicitly revive them.
