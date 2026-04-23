@@ -4,7 +4,9 @@ Store **redacted** exports you want in version control: field lists, sample CSVs
 
 | Folder | Use |
 |--------|--------|
-| `zoho/` | Zoho-related snapshots (e.g. schema exports, **scrubbed** data samples) |
+| `zoho/picklists/` | Starter CSVs for picklist values (lost reason, payment terms, etc.) |
+| `zoho/import/` | CSV templates for lead/product imports (no live PII in Git) |
+| `zoho/` (other) | Schema exports, **scrubbed** samples, dated drops |
 
 ## Rules
 

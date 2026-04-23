@@ -1,0 +1,21 @@
+{
+  "comment": "Single unified Deals pipeline (Zoho default). Sector = Line of business on Lead/Deal (Production | MPS | Radiology). Stage labels must match Deals → Stage picklist exactly. Sync: ./venv/bin/python provision_pipelines.py --sync",
+  "pipelines": [
+    {
+      "display_value": "Standard (Standard)",
+      "default": true,
+      "intent": "Unified motion for all sectors; filter by Line of business in CRM views and Power BI.",
+      "stages": [
+        "Qualification",
+        "Needs Analysis",
+        "Value Proposition",
+        "Identify Decision Makers",
+        "Proposal/Price Quote",
+        "Negotiation/Review",
+        "Closed Won",
+        "Closed Lost",
+        "Closed Lost to Competition"
+      ]
+    }
+  ]
+}

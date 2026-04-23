@@ -7,15 +7,16 @@ This repository holds **docs and automation** for a **Zoho CRM Professional** sa
 | Path | Purpose |
 |------|--------|
 | `docs/zoho/` | Zoho and Power BI playbooks, architecture, developer workflow |
+| `docs/zoho/IMPLEMENTATION-CHECKLIST.md` | **Phased go-live** — start here after workshops |
 | `docs/PROJECT-STATUS.md` | Current scope and next steps — update as you go |
 | `tools/zoho/` | Python (or other) **API** helpers — OAuth, sync, one-off tools |
 | `artifacts/zoho/` | Optional **non-secret** exports (CSV schema snapshots, PDF samples, etc.) |
 
 ## Quick start (developer)
 
-1. Read `docs/zoho/DEVELOPER.md` and `docs/zoho/GETTING-STARTED.md`.
-2. In `tools/zoho/`, copy `.env.example` to `.env` (not committed) after you have Zoho OAuth values.
-3. `make venv` (creates `tools/zoho/venv` and installs `tools/zoho/requirements.txt`), or the same `pip` commands in `docs/zoho/DEVELOPER.md`.
+1. **Implementation order:** [`docs/zoho/IMPLEMENTATION-CHECKLIST.md`](docs/zoho/IMPLEMENTATION-CHECKLIST.md) — phased Zoho go-live. **Picklist/import starters:** [`artifacts/zoho/picklists/`](artifacts/zoho/picklists/), [`artifacts/zoho/import/`](artifacts/zoho/import/).
+2. Read `docs/zoho/DEVELOPER.md` and `docs/zoho/GETTING-STARTED.md`.
+3. `make venv`, then run **`tools/zoho/connect_zoho.py`** in Terminal for guided OAuth (secrets stay local — do not paste them into AI chat). See `tools/zoho/README.md` for `provision_pipelines.py --sync`, `zoho_ping.py`, etc.
 
 ## Secrets
 

@@ -1,0 +1,30 @@
+---
+description: Run Zoho API and tools/zoho scripts in-terminal by default; brief confirm only for risky ops
+alwaysApply: true
+---
+
+# Zoho CRM — automation and permission
+
+The user has authorized **live Zoho API use** and **running terminal commands** in this project when credentials exist (e.g. `tools/zoho/.env`). Prefer speed and automation over handing back manual steps.
+
+## Default behavior
+
+- **Execute** provisioning scripts, `make` targets, and Python in `tools/zoho` yourself when the task is clearly “do this in Zoho” or “run the sync/provision script.”
+- Do **not** default to “run this command yourself” unless the environment clearly lacks tokens/config or the user is in read-only / ask-only mode.
+- **Dry-run** when the script supports it and the user asked to preview only.
+
+## When to pause for a short yes / no
+
+Ask one quick confirm before:
+
+- **Bulk or hard-to-undo** changes (mass deletes, wipes, wide updates).
+- **Org-wide or security-sensitive** settings (roles, profiles, org config) when not explicitly requested.
+- **Ambiguous intent** (unclear target org, sandbox vs production, or conflicting instructions).
+
+## No extra permission loop for
+
+- Idempotent field/layout automation already agreed in the thread.
+- Read-only API calls (list, get, describe).
+- Re-running the same approved script after a fix.
+
+If a command fails (missing `.env`, scope, DC URL), **diagnose and fix or report** in the same turn instead of stopping at “you should run X.”

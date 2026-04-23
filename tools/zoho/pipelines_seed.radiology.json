@@ -1,0 +1,17 @@
+{
+  "comment": "ARCHIVED (2026-04-23): Radiology is a Line of business value, not a separate pipeline. Kept for reference only. If you ever split pipelines again: stage labels must exist on Deals → Stage. Run: ./venv/bin/python provision_pipelines.py --seed pipelines_seed.radiology.json",
+  "pipelines": [
+    {
+      "display_value": "Radiology",
+      "default": false,
+      "stages": [
+        "Qualification",
+        "Value Proposition",
+        "Proposal/Price Quote",
+        "Negotiation/Review",
+        "Closed Won",
+        "Closed Lost"
+      ]
+    }
+  ]
+}
