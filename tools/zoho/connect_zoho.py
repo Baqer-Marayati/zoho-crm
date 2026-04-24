@@ -139,6 +139,9 @@ def main() -> int:
     print(
         "\nGrant code — from API Console → Self Client → Generate Code.\n"
         "It expires quickly; generate a new one if this fails.\n"
+        "\n**Scopes (paste into Generate Code) for most repo automation + API discovery:\n"
+        "  ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL,ZohoCRM.apis.READ\n"
+        "After setup, run: ./venv/bin/python zoho_doctor.py  (or: make zoho-doctor)\n"
     )
     grant = input("Grant code: ").strip()
     if not grant:

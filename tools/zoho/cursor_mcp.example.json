@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "zoho-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "PASTE_MCP_URL_FROM_ZOHO_CONSOLE"
+      ]
+    }
+  }
+}

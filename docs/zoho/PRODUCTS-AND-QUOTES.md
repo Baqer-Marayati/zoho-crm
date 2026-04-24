@@ -45,8 +45,40 @@ Until Wave A is stable, allow **custom line items** on quotes (Zoho supports add
 2. **Wave A** product list + **Quotes** layout linked to **Deals**.  
 3. Train reps on **one** quote template (PDF) and when to attach files.
 
+## 6. How quotes “look”: screen vs customer PDF
+
+Zoho separates **(A) what reps edit**, **(B) what appears on the generated PDF/email**, and **(C) what lives only on the Product record**.
+
+### A. Quote record + line items (CRM screen)
+
+- **Quote header** — standard fields (Customer, Deal, Valid Until, Terms, Owner) plus any custom fields you add (e.g. **Payment Terms**, **Contract Folder URL** from Phase 3).
+- **Product Details / line items** — when someone picks a **Product**, Zoho fills **list price**, **quantity**, and often a **line-level Description**. Whether the **full Product `Description`** copies to the line depends on **org/product-line settings** and edition; very long consolidated specs (like the five-machine text) are usually **too heavy** for every PDF line.
+- **Practical pattern for your catalog**  
+  - Keep the **Product `Description`** as a **short, stable** blurb (same for every quote that uses that product). **Do not** change the product record when the rep picks a speed or finisher; put those on the **quote line** (picklists + optional line description) so the PDF reflects the **configuration** without rewriting master data.  
+  - Deep spec stays in **attachments** and **Compatible finishers / POD** text on the product (see `QUOTE-LINE-EXTENSIONS.md`).  
+  - Optional: a separate **“Line summary”** formula or text on the line if you need a one-line PDF snippet built from product + picks.
+
+### B. Quote PDF / print template (customer-facing)
+
+- Built under **Setup → Templates** (or **Print/Web Templates** / **Quote templates**, depending on your CRM edition and Next Gen vs Classic).
+- The template controls **logo, fonts, footer, and which merge fields** appear — e.g. `${Quotes.Product Details}` style tables, individual line columns, subtotals, IQD formatting.
+- **Design levers:** add/remove **columns** on the product table (product name, qty, rate, amount, **line description**, your custom variant fields); add a **Terms** block; optional **second page** for legal text.
+- **Product description on PDF:** map the field you want (short summary vs full `Description`). If the PDF becomes cluttered, prefer **short line text** + **“see attached datasheet”** or link to **Contract Folder URL**.
+
+### C. Product record (not automatically the whole PDF)
+
+- **Attachments** (brochures, datasheets) stay on **Products** unless you attach copies to the **Quote** for this deal. Train reps: attach PDF to the quote when the customer must receive it with the official quote.
+
+### Suggested design pass (checklist)
+
+1. **Layouts** — **Quotes** header section + **Product Details** subform: show variant fields and a concise line description column.  
+2. **Products** — add **Short description for quotes** (or trim `Description`) so PDFs stay professional.  
+3. **Template** — one branded PDF; preview with a real line using **Canon varioPRINT 6000 TITAN** + variant fields filled.  
+4. **Training** — when to paste extra text on the line vs attach spec PDF.
+
 ## Related
 
+- [`QUOTE-LINE-EXTENSIONS.md`](./QUOTE-LINE-EXTENSIONS.md) — finishers & POD/paper on quote lines + product reference fields  
 - [`LEADS-AND-DEALS.md`](./LEADS-AND-DEALS.md)  
 - [`SALES-PIPELINE-AND-STAGES.md`](./SALES-PIPELINE-AND-STAGES.md)  
 - [`PROJECT-STATUS.md`](../PROJECT-STATUS.md)

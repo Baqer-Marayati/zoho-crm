@@ -21,6 +21,8 @@ OAuth scopes:
 Usage:
   cd tools/zoho && ./venv/bin/python provision_phase3.py
   ./venv/bin/python provision_phase3.py --step 1
+  ./venv/bin/python provision_phase3.py --step 2 --products-csv ../../artifacts/zoho/import/canon_products_wave_a_en.csv
+  ./venv/bin/python provision_phase3.py --step 2 --products-csv ../../artifacts/zoho/import/canon_products_five_machines_en.csv
   ./venv/bin/python provision_phase3.py --verify
   ./venv/bin/python provision_phase3.py --dry-run
 """
@@ -405,18 +407,75 @@ def _read_products_csv(path: Path) -> tuple[list[dict], bool]:
     return rows, has_placeholder
 
 
-def step2_products(session: requests.Session, api_domain: str, dry_run: bool) -> bool:
+def _norm_product_name(name: str) -> str:
+    return (name or "").strip().casefold()
+
+
+def _fetch_existing_products_keys(
+    session: requests.Session, api_domain: str
+) -> tuple[set[str], set[str]]:
+    """Existing Product_Code (non-empty) and normalized Product_Name for idempotency."""
+    existing_codes: set[str] = set()
+    existing_names: set[str] = set()
+    page = 1
+    while True:
+        r = _crm(
+            session,
+            api_domain,
+            "GET",
+            "/Products",
+            params={
+                "fields": "Product_Name,Product_Code",
+                "per_page": 200,
+                "page": page,
+            },
+        )
+        if r.status_code == 204:
+            break
+        if not r.ok:
+            print(
+                f"  GET /Products (page {page}) HTTP {r.status_code}: {r.text[:1500]}",
+                file=sys.stderr,
+            )
+            if r.status_code in (401, 403) or "OAUTH_SCOPE_MISMATCH" in r.text:
+                print("  → Token needs ZohoCRM.modules.ALL scope.", file=sys.stderr)
+            raise RuntimeError("Cannot list Products for idempotency check")
+        body = r.json()
+        for p in body.get("data") or []:
+            code = (p.get("Product_Code") or "").strip()
+            if code:
+                existing_codes.add(code)
+            n = _norm_product_name(p.get("Product_Name") or "")
+            if n:
+                existing_names.add(n)
+        info = body.get("info") or {}
+        if not info.get("more_records"):
+            break
+        page += 1
+    return existing_codes, existing_names
+
+
+def step2_products(
+    session: requests.Session,
+    api_domain: str,
+    dry_run: bool,
+    csv_path: Path | None = None,
+) -> bool:
     print("\n=== Step 2: Wave A Products Import ===")
-    if not PRODUCTS_CSV.is_file():
-        print(f"  CSV not found: {PRODUCTS_CSV}", file=sys.stderr)
+    path = csv_path or PRODUCTS_CSV
+    if not path.is_file():
+        print(f"  CSV not found: {path}", file=sys.stderr)
         return False
 
-    rows, has_placeholder = _read_products_csv(PRODUCTS_CSV)
+    rows, has_placeholder = _read_products_csv(path)
     if has_placeholder:
-        rel = PRODUCTS_CSV.relative_to(REPO_ROOT)
+        try:
+            rel = path.relative_to(REPO_ROOT)
+        except ValueError:
+            rel = path
         print(
-            f"  Wave A CSV still has placeholder rows — fill "
-            f"`{rel}` with real SKUs and re-run.\n"
+            f"  Wave A CSV still has placeholder rows — replace "
+            f"`{rel}` with real products and re-run.\n"
             "  (Skipping import; this is not an error.)"
         )
         return True  # not a failure
@@ -425,34 +484,30 @@ def step2_products(session: requests.Session, api_domain: str, dry_run: bool) ->
         print("  CSV has no data rows; skip.")
         return True
 
-    # Fetch existing Product_Code values for idempotency
-    r = _crm(
-        session, api_domain, "GET", "/Products",
-        params={"fields": "Product_Code", "per_page": 200},
-    )
-    existing_codes: set[str] = set()
-    if r.status_code == 204:
-        pass
-    elif r.ok:
-        for p in r.json().get("data") or []:
-            code = (p.get("Product_Code") or "").strip()
-            if code:
-                existing_codes.add(code)
-    else:
-        print(f"  GET /Products HTTP {r.status_code}: {r.text[:1500]}", file=sys.stderr)
-        if r.status_code in (401, 403) or "OAUTH_SCOPE_MISMATCH" in r.text:
-            print("  → Token needs ZohoCRM.modules.ALL scope.", file=sys.stderr)
+    try:
+        existing_codes, existing_names = _fetch_existing_products_keys(session, api_domain)
+    except RuntimeError:
         return False
+    print(
+        f"  Idempotency: {len(existing_codes)} product(s) with Product_Code, "
+        f"{len(existing_names)} distinct name(s) in org."
+    )
 
     to_create: list[dict[str, Any]] = []
+    pending_names: set[str] = set()
     for row in rows:
         code = (row.get("Product_Code") or "").strip()
         name = (row.get("Product_Name") or "").strip()
         if not name:
             continue
+        nk = _norm_product_name(name)
         if code and code in existing_codes:
-            print(f"  Skip (exists): {code} — {name}")
+            print(f"  Skip (exists by code): {code} — {name}")
             continue
+        if nk in existing_names or nk in pending_names:
+            print(f"  Skip (exists by name): {name}")
+            continue
+        pending_names.add(nk)
         product: dict[str, Any] = {"Product_Name": name}
         if code:
             product["Product_Code"] = code
@@ -636,8 +691,10 @@ def run_verify(session: requests.Session, api_domain: str) -> None:
 
     # [2] Products
     print("\n[2] Wave A Products")
-    if PRODUCTS_CSV.is_file():
-        _, has_ph = _read_products_csv(PRODUCTS_CSV)
+    canon_csv = REPO_ROOT / "artifacts" / "zoho" / "import" / "canon_products_wave_a_en.csv"
+    csv_check = PRODUCTS_CSV if PRODUCTS_CSV.is_file() else canon_csv
+    if csv_check.is_file():
+        _, has_ph = _read_products_csv(csv_check)
         if has_ph:
             print(
                 "  NOTE: Wave A CSV still has placeholder rows — "
@@ -655,7 +712,7 @@ def run_verify(session: requests.Session, api_domain: str) -> None:
                 print(f"  ERROR: GET /Products HTTP {r2.status_code}")
                 all_ok = False
     else:
-        print(f"  NOTE: {PRODUCTS_CSV} not found.")
+        print(f"  NOTE: No product CSV at {PRODUCTS_CSV} or {canon_csv}.")
 
     # [3] Fields
     print("\n[3] Layout Fields")
@@ -724,6 +781,12 @@ def main() -> int:
         "--dry-run", action="store_true",
         help="Print planned actions; no API writes",
     )
+    parser.add_argument(
+        "--products-csv",
+        type=Path,
+        default=None,
+        help=f"CSV for step 2 only (default: {PRODUCTS_CSV})",
+    )
     args = parser.parse_args()
 
     try:
@@ -745,7 +808,9 @@ def main() -> int:
     if run_all or args.step == 1:
         ok = step1_price_book(session, api_domain, args.dry_run) and ok
     if run_all or args.step == 2:
-        ok = step2_products(session, api_domain, args.dry_run) and ok
+        ok = step2_products(
+            session, api_domain, args.dry_run, args.products_csv,
+        ) and ok
     if run_all or args.step == 3:
         ok = step3_layout_fields(session, api_domain, args.dry_run) and ok
     if run_all or args.step == 4:

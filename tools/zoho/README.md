@@ -2,7 +2,24 @@
 
 Add **small, focused** scripts here: OAuth test, bulk import, health checks, webhooks, or one-off data fixes.
 
+**End-to-end automation (OAuth, Zoho MCP, what cannot be full API)**: [`../../docs/zoho/AUTOMATION-STACK.md`](../../docs/zoho/AUTOMATION-STACK.md).
+
+**Scope + connectivity check** (run after any new grant or when APIs return empty or 401):
+
+```bash
+./venv/bin/python zoho_doctor.py
+# or: make zoho-doctor
+```
+
 ## Setup
+
+From repo root (installs Homebrew **Node**/`npx` for Zoho MCP’s `mcp-remote` bridge, then Python venv + deps):
+
+```bash
+make zoho-setup
+```
+
+Or only Python:
 
 ```bash
 cd tools/zoho
@@ -39,7 +56,21 @@ Edit `pipelines_seed.json` so stage names match your org’s **Deals → Stage**
 # or: make zoho-sync-pipelines
 ```
 
-**Unified model:** `pipelines_seed.json` now defines only **Standard (Standard)**; sector is **Line of business** on Lead/Deal (see `provision_phase2_fields.py`). `pipelines_seed.radiology.json` is **archived** (Radiology = picklist value, not a pipeline).
+**Unified model:** `pipelines_seed.json` now defines only **Standard (Standard)**; sector is **Line of business** on Lead/Deal (see `provision_phase2_fields.py`). A legacy radiology pipeline seed is in **`archive/pipelines_seed.radiology.json`** (Radiology = picklist value, not a separate pipeline; use `--seed` only for reference or recovery).
+
+**Teamspace (Next Gen sidebar):** To create the **Direct department** workspace and attach core modules, use `provision_teamspace.py` with `../../artifacts/zoho/teamspace/direct_department.json` (see `../../artifacts/zoho/teamspace/README.md`). Requires settings scopes (e.g. `ZohoCRM.settings.ALL`). If the API rejects `access_type`, create the teamspace in the Zoho UI and keep the manifest as the source of truth.
+
+**Canon five-machine line:** `build_canon_five_machines_csv.py` merges the flat EN spec CSV into **five** Zoho products with SKUs (`canon_products_five_machines_en.csv`). See `../../artifacts/zoho/import/canon_product_line/README.md`. To **delete** the legacy 23 Wave-A product names in Zoho and **re-import** the five, run `sync_canon_five_products_zoho.py` or `make zoho-sync-canon-five-products`.
+
+**Quote line:** `provision_quote_line_extensions.py` syncs product **Compatible finishers / POD** text from `../../artifacts/zoho/product_extensions/extensions_by_product_code.json` (`make zoho-quote-line-extensions`). **`provision_quoted_line_dependencies.py`** adds **Machine SKU**, **Model / speed**, renames line picklists to **Configuration 1/2**, and sets **map dependency** so options follow the chosen SKU (`make zoho-quoted-line-deps`; see `../../docs/zoho/QUOTE-LINE-EXTENSIONS.md`). **`provision_quoted_line_product_first_layout.py`** (`make zoho-quote-line-product-first-layout`) renames **Machine SKU** to **Product (Machine)**, moves **Product Name** off the used layout when Zoho allows (otherwise sets **Product Name** read-only on the layout), and re-syncs picklist options to the layout (required for `map_dependency`). Re-paste Deluge from `../../artifacts/zoho/deluge/quoted_items_sync_machine_sku.deluge` into the custom function after that.
+
+**Quote header — Reference (system field `Subject`):** `provision_quote_reference_field.py` (`make zoho-quote-reference-field`) renames the label to **Reference**. `provision_quote_client_script.py` (`make zoho-quote-client-script` or `make zoho-quote-reference-full`) tries to **GET/PUT** the script from `../../artifacts/zoho/client_scripts/quote_reference_autofill.js` via `GET /settings/client_scripts/Quotes`; that endpoint often needs **`ZohoCRM.settings.client_scripts.ALL`** in addition to `settings` scopes (see `.env.example`). Re-ordering the field in the form is **UI-only**; the Layouts API cannot move system-mandatory **Subject** out of a section.
+
+**CPQ Product Configurator (experimental):** `provision_cpq_product_configurator_pilot.py` (`make zoho-cpq-product-configurator-pilot`, `--dry-run` to print the resolved JSON only) calls the undocumented `POST /crm/v8/settings/cpq/product_configurators` endpoint. If Zoho returns 500, finish the same pilot in **Setup → Developer Hub → CPQ → Product Configurator**. To push the Deluge and workflow to Zoho via API, use **`provision_quoted_line_machine_sku_workflow.py`** (`make zoho-quote-line-machine-sku-wf`) with settings scopes, or follow `../../docs/zoho/QUOTE-LINE-AUTOMATION.md`. Optional: **`provision_quoted_line_hide_machine_sku_layout.py`** if you want the picklist hidden again (then `map_dependency` cannot apply — not compatible with the product-first layout).
+
+**Canon product descriptions:** Short catalog copy is in `build_canon_five_machines_csv.py` (`CURATED_DESCRIPTIONS`). Rebuild CSV + push to Zoho: `make zoho-build-canon-five-machines` then `make zoho-sync-canon-product-descriptions` (or `sync_canon_product_descriptions.py`).
+
+**Canon PDFs on Products:** `upload_canon_product_pdfs.py` posts `*.pdf` from `~/Dropbox/Work/Canon/Canon machine specs for SAP` subfolders to the matching product’s **Attachments** (`make zoho-upload-canon-product-pdfs`). Needs attachment create scope; re-run may duplicate files if Zoho allows.
 
 ### Phase 2 fields (Line of business, Lost Reason, Competitor)
 

@@ -10,9 +10,11 @@
 | **Closed Lost** | **Standard** reason set (below) |
 | **Team (0–3 mo)** | **4–10** active users — use **clear roles/profiles** |
 
-## 1. Roles / profiles (do this first — ~30 min)
+## 1. Roles / profiles (~30 min)
 
 You described **specialist reps**. Mirror that in Zoho so permissions and defaults stay simple.
+
+If you are still in **admin-only** setup, you may defer this until **Phase 1** (immediately before licenses and user assignment) and complete **§4 conversion mapping** first — see [`IMPLEMENTATION-CHECKLIST.md`](./IMPLEMENTATION-CHECKLIST.md) **Execution order**.
 
 1. **Setup → Users and Control → Security → Roles**  
    - Example: `Sales — Production`, `Sales — MPS`, `Sales Manager`, `CRM Admin`.  

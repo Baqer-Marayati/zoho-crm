@@ -1,0 +1,19 @@
+{
+  "name": "Direct department",
+  "description": "Direct sales workspace: core CRM modules for pipeline and quoting.",
+  "access_type": "PUBLIC",
+  "icon_color": "#2430D0",
+  "folders": [
+    {
+      "display_label": "Sales",
+      "modules": [
+        "Leads",
+        "Accounts",
+        "Contacts",
+        "Deals",
+        "Products",
+        "Quotes"
+      ]
+    }
+  ]
+}

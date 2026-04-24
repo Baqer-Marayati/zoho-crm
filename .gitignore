@@ -13,6 +13,9 @@ _build/
 **/*.token.json
 tools/zoho/.token*
 *.pem
+# Local image probes for API upload scripts (regenerate in your env if needed)
+tools/zoho/zoho_test_*.jpg
+tools/zoho/zoho_test_*.png
 
 # Python
 **/venv/

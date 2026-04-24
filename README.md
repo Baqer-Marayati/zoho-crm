@@ -7,14 +7,18 @@ This repository holds **docs and automation** for a **Zoho CRM Professional** sa
 | Path | Purpose |
 |------|--------|
 | `docs/zoho/` | Zoho and Power BI playbooks, architecture, developer workflow |
+| `docs/zoho/INDEX.md` | **Single docs entrypoint** for Zoho implementation |
 | `docs/zoho/IMPLEMENTATION-CHECKLIST.md` | **Phased go-live** — start here after workshops |
 | `docs/PROJECT-STATUS.md` | Current scope and next steps — update as you go |
-| `tools/zoho/` | Python (or other) **API** helpers — OAuth, sync, one-off tools |
-| `artifacts/zoho/` | Optional **non-secret** exports (CSV schema snapshots, PDF samples, etc.) |
+| `docs/zoho/archive/` | Workshop **configuration rounds** (3–8) and other **historical** notes |
+| `tools/zoho/` | Python **API** helpers — OAuth, pipelines, product sync, one-off tools |
+| `tools/zoho/archive/` | Legacy or alternate **JSON** seeds (e.g. old pipeline layout) |
+| `artifacts/zoho/` | **Non-secret** data: import CSVs, picklists, Deluge copies, product extensions |
+| `make help` | From repo root: lists **zoho-*** **Makefile** shortcuts |
 
 ## Quick start (developer)
 
-1. **Implementation order:** [`docs/zoho/IMPLEMENTATION-CHECKLIST.md`](docs/zoho/IMPLEMENTATION-CHECKLIST.md) — phased Zoho go-live. **Picklist/import starters:** [`artifacts/zoho/picklists/`](artifacts/zoho/picklists/), [`artifacts/zoho/import/`](artifacts/zoho/import/).
+1. **Docs entrypoint:** [`docs/zoho/INDEX.md`](docs/zoho/INDEX.md) (then follow [`docs/zoho/IMPLEMENTATION-CHECKLIST.md`](docs/zoho/IMPLEMENTATION-CHECKLIST.md) for phased execution). **Picklist/import starters:** [`artifacts/zoho/picklists/`](artifacts/zoho/picklists/), [`artifacts/zoho/import/`](artifacts/zoho/import/).
 2. Read `docs/zoho/DEVELOPER.md` and `docs/zoho/GETTING-STARTED.md`.
 3. `make venv`, then run **`tools/zoho/connect_zoho.py`** in Terminal for guided OAuth (secrets stay local — do not paste them into AI chat). See `tools/zoho/README.md` for `provision_pipelines.py --sync`, `zoho_ping.py`, etc.
 

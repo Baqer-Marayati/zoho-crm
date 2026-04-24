@@ -1,0 +1,10 @@
+{
+  "source": "Canon Middle East — large format printer category pages (en.canon-me.com), researched 2026-04-24",
+  "zoho_import_csv": "artifacts/zoho/import/canon_products_lfp_me_en.csv",
+  "pages": [
+    "https://en.canon-me.com/business/products/large-format-printers/cad-gis-plotters/",
+    "https://en.canon-me.com/business/products/large-format-printers/photography-and-fine-art-printers/"
+  ],
+  "notes": "SKUs group models like Canon headings (TM-350/355, TX-3200/4200). PDFs live in Dropbox …/Canon machine specs for SAP/LFP ME/ as CANON-*_*.pdf (Canon bigcontent, canon.ca/lfp.canon.ca, reseller mirrors). TC-21 uses a TC-line brochure (TC-20) where no TC-21 PDF was sourced. plotWAVE T50/T55 product uses full T-series brochure (covers T30–T75).",
+  "collateral_folder": "~/Dropbox/Work/Canon/Canon machine specs for SAP/LFP ME"
+}

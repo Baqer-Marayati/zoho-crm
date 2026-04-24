@@ -8,16 +8,21 @@ This repo is **Zoho-first**: documentation under `docs/zoho/`, automation under 
 Zoho-CRM/
   README.md                 # Project entry
   .gitignore                # Ignores .env, venv, local reference clones
+  AGENTS.md                 # Short pointers for AI assistants (no secrets)
   docs/
     PROJECT-STATUS.md       # Update when milestones change
     README.md               # Doc index
-    zoho/                   # All playbooks
+    zoho/                   # Active playbooks and architecture
+    zoho/archive/           # Workshop rounds (retired or historical reference)
   tools/zoho/
     .env.example            # Copy to .env — never commit .env
     requirements.txt        # Python deps for API scripts
     README.md               # How to run scripts
-  artifacts/zoho/           # Optional non-secret exports (see artifacts/README.md)
+    archive/                # e.g. legacy pipeline JSON seeds
+  artifacts/zoho/           # Optional non-secret exports, CSVs, Deluge copies (see artifacts/README.md)
 ```
+
+Run `make help` from the repo root for **Makefile** shortcuts (`zoho-doctor`, `zoho-phase3`, …).
 
 ## Environment (local only)
 

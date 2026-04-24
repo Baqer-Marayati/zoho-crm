@@ -15,9 +15,11 @@ Also:
   - Appends any **new** CSV values (e.g. Radiology) to an existing **Leads** Line of business
     field via PATCH when possible.
 
-What this does NOT configure (Zoho UI or unsupported by API): lead conversion field mapping,
-layout rules for “required on Closed Lost”, stage–probability %, Closing Date mandatory.
-See docs/zoho/PHASE2-AUTOMATED.md after running.
+What this does NOT configure via this script: lead conversion field mapping (that is org
+metadata; read/audit with `audit_lead_conversion_mapping.py` — mapping is on each Lead
+field’s `convert_mapping` in `GET /settings/fields?module=Leads`). This script also does not
+set layout rules for “required on Closed Lost”, stage–probability %, or Closing Date mandatory
+(those use `provision_phase2_layouts.py` or UI). See docs/zoho/PHASE2-AUTOMATED.md after running.
 """
 from __future__ import annotations
 

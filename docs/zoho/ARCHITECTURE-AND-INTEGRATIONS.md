@@ -17,6 +17,18 @@ flowchart LR
 - **Power BI** is where you publish **read-only** analytics for management (and optionally for reps) using data sourced from Zoho.
 - **This repo** stores **documentation**, **automation** (e.g. Python/Node that call Zoho’s API), and **versioned exports** (under `artifacts/`) that you choose to keep. It is *not* a full real-time mirror of the Zoho admin configuration.
 
+## Repository layout (quick)
+
+| Path | Role |
+|------|------|
+| `docs/zoho/` | Playbooks, checklists, pipeline and quote-line docs |
+| `docs/zoho/archive/` | Historical workshop captures (e.g. configuration rounds) |
+| `tools/zoho/` | API scripts, `connect_zoho.py`, `pipelines_seed.json` |
+| `tools/zoho/archive/` | Retired or rarely used seeds (e.g. alternate pipeline JSON) |
+| `artifacts/zoho/` | Non-secret data: import CSVs, picklists, Deluge snippets, product extensions |
+
+`make help` lists common automation targets. Authoritative org state still lives in **Zoho**; the repo is the **versioned** automation and decision record.
+
 ## Customization in Zoho
 
 - **User-facing behavior:** workflows, **Deluge** functions, **Blueprints** (per edition), layout rules, webhooks, and the built-in **quote** and **email/PDF** layers.

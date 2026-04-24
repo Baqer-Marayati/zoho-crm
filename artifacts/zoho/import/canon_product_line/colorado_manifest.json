@@ -1,0 +1,53 @@
+{
+  "zoho_import_csv": "artifacts/zoho/import/canon_products_colorado_en.csv",
+  "notes": "Collateral downloaded 2026-04-24 into ~/Dropbox/Work/Canon/Canon machine specs for SAP/{Colorado,Arizona}. Descriptions summarize those PDFs; verify current models on graphiPLAZA / regional Canon sites before quoting.",
+  "products": [
+    {
+      "key": "colo_series",
+      "product_name": "Canon Colorado series",
+      "product_code": "CANON-COLO-SER",
+      "configuration_options": ["M3", "M3W", "M5", "M5W", "1650"],
+      "collateral_on_disk": [
+        "Colorado/Colorado-M-series_Specsheet_2024_ANZ_CPP.pdf",
+        "Colorado/Colorado-M-series_Spec-Sheet_Scene7.pdf",
+        "Colorado/Colorado-1650_Brochure_EN_CanonCA.pdf",
+        "Colorado/Colorado-series_Brochure-with-Spec_2022_CanonCA.pdf"
+      ],
+      "source_urls": [
+        "https://anz.cpp.canon/app/uploads/2024/10/Colorado-M-series_Specsheet_FINAL_2024_SP-1-1.pdf",
+        "https://s7d1.scene7.com/is/content/canon/26-0299-7979_Colorado-M-series-Spec-Sheetpdf",
+        "https://www.canon.ca/dam/Brochures/BICG/EN/CO1650_Brch_EN-2020-W2.pdf",
+        "https://www.canon.ca/dam/Brochures/BICG/EN/Colorado-series-brochure-with-spec-2022.pdf",
+        "https://downloads.cpp.canon/ProductDownloads/Index/1356",
+        "https://downloads.cpp.canon/ProductDownloads/Index/1239"
+      ],
+      "collateral_suggested_filenames": [
+        "CANON-COLO-SER_hero.jpg",
+        "CANON-COLO-SER_datasheet_en.pdf",
+        "CANON-COLO-SER_brochure_en.pdf"
+      ]
+    },
+    {
+      "key": "ariz_series",
+      "product_name": "Canon Arizona series",
+      "product_code": "CANON-ARIZ-SER",
+      "configuration_options": ["135 GT", "1300 FLXflow", "2300 FLXflow", "6100 series"],
+      "collateral_on_disk": [
+        "Arizona/Arizona-Family_FLXflow_Brochure.pdf",
+        "Arizona/Arizona-1300-FLOW_Product-Brochure_CPP.pdf",
+        "Arizona/Arizona-2300_Brochure_EMEA.pdf"
+      ],
+      "source_urls": [
+        "https://www.eojohnson.com/hubfs/2025/Production%20Print/Printing%20Presses%2C%20Wide%20Format%20Spec%20Sheets%20%2B%20Images/Arizona-Family-Brochure-FLXflowpdf.pdf",
+        "https://sg.canon/media/document/2023/11/08/9e5329e5a0df4cd290b2e4ed0034c59f_Arizona+1300+FLOW+-+Product+Brochure_CPP_HR.pdf",
+        "https://canon.a.bigcontent.io/v1/static/arizona_2300_brochure_emea_lr",
+        "https://graphiplaza.cpp.canon/products/arizona"
+      ],
+      "collateral_suggested_filenames": [
+        "CANON-ARIZ-SER_hero.jpg",
+        "CANON-ARIZ-SER_datasheet_en.pdf",
+        "CANON-ARIZ-SER_brochure_en.pdf"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+{
+  "CANON-VP6K-TITAN": {
+    "product_name": "Canon varioPRINT 6000 TITAN",
+    "finishers": [],
+    "pod_paper": [
+      "Canon High Capacity Stacker (VarioPrint 6000 TITAN)",
+      "Canon PAPER INPUT MODULE FLEX (VarioPrint 6000 TITAN)"
+    ],
+    "notes": "Finishers are typically separate inline/stacker/PIM options; none listed as booklet/staple finisher in Wave-A spec."
+  },
+  "CANON-IP-V1000": {
+    "product_name": "Canon imagePRESS V1000",
+    "finishers": [
+      "Canon BOOKLET FINISHER-AF1 (imagePRESS V1000)"
+    ],
+    "pod_paper": [
+      "Canon POD Deck Lite-C1 (imagePRESS V1000)"
+    ]
+  },
+  "CANON-IP-V1350": {
+    "product_name": "Canon imagePRESS V1350",
+    "finishers": [
+      "Canon BOOKLET FINISHER-AF1 (imagePRESS V1350)"
+    ],
+    "pod_paper": [
+      "Canon POD Deck-E1 (imagePRESS V1350)"
+    ]
+  },
+  "CANON-IP-V9K-SER": {
+    "product_name": "Canon imagePRESS V900 series",
+    "finishers": [
+      "Canon Staple Finisher -AG1 (imagePRESS V900)",
+      "Canon Booklet Finisher-AC2 — V700 & V800 only (imagePRESS V900)"
+    ],
+    "pod_paper": [
+      "Canon POD Deck Lite-C1 (imagePRESS V900)"
+    ],
+    "notes": "Booklet Finisher-AC2 applies to V700/V800 configurations only; confirm engine tier on quote line."
+  },
+  "CANON-VP140-SER": {
+    "product_name": "Canon varioPRINT 140 series",
+    "finishers": [
+      "Canon Booklet Finisher-AG1 (varioPRINT 140)"
+    ],
+    "pod_paper": [
+      "Canon EXTERNAL PAPER MODULE-E1 (varioPRINT 140)"
+    ]
+  },
+  "CANON-COLO-SER": {
+    "product_name": "Canon Colorado series",
+    "finishers": [],
+    "pod_paper": [
+      "Roll media / take-up / input options: set on quote line per job (not Wave-A cut-sheet POD)."
+    ],
+    "notes": "Quote-line configuration: M3, M3W, M5, M5W, or 1650. Add media handling, take-up, optional kits, and RIP."
+  },
+  "CANON-ARIZ-SER": {
+    "product_name": "Canon Arizona series",
+    "finishers": [],
+    "pod_paper": [
+      "Flatbed table / media handling: set on quote line per model (not Wave-A cut-sheet POD)."
+    ],
+    "notes": "Confirm Arizona model family (e.g. 135 GT, 1300/2300/6100 series), table size, and workflow on the quote line."
+  },
+  "CANON-CW-T-SER": {
+    "product_name": "Canon colorWAVE T-series",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "CAD/GIS colour technical system (CrystalPoint). Rolls, stacker, and software per quote."
+  },
+  "CANON-PW-T3035": {
+    "product_name": "Canon plotWAVE T30 / T35",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Monochrome CAD plotter; confirm T30 vs T35 and roll/stacker configuration."
+  },
+  "CANON-PW-T5055": {
+    "product_name": "Canon plotWAVE T50 / T55",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Monochrome CAD plotter; confirm T50 vs T55, sheet feeder, and media."
+  },
+  "CANON-PW-T75": {
+    "product_name": "Canon plotWAVE T75",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Six-roll monochrome CAD system; confirm stacker/finishing options."
+  },
+  "CANON-IPF-TZ32000": {
+    "product_name": "Canon imagePROGRAF TZ-32000",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "36\" 5-colour production technical printer; confirm security/stacker/RIP options."
+  },
+  "CANON-IPF-TX-SER": {
+    "product_name": "Canon imagePROGRAF TX series",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Quote TX-3200 (36\") or TX-4200 (44\"); AEC&M positioning."
+  },
+  "CANON-IPF-TM-SER": {
+    "product_name": "Canon imagePROGRAF TM series",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Quote TM-255, TM-350, or TM-355; HDD on TM-255 per ME listing."
+  },
+  "CANON-IPF-TC21": {
+    "product_name": "Canon imagePROGRAF TC-21",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "Compact 24\" desktop AEC; confirm media kits."
+  },
+  "CANON-IPF-PRO-SER": {
+    "product_name": "Canon imagePROGRAF PRO series",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "12-colour photo/fine art; quote PRO-2600 / PRO-4600 / PRO-6600 width."
+  },
+  "CANON-IPF-PRO1100": {
+    "product_name": "Canon imagePROGRAF PRO-1100",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "A2 professional photo printer; confirm inks and accessories."
+  },
+  "CANON-IPF-GPS-SER": {
+    "product_name": "Canon imagePROGRAF GP-S series",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "7-colour poster line; quote GP-2600S / GP-4600S / GP-6600S."
+  },
+  "CANON-IPF-GP-CG-SER": {
+    "product_name": "Canon imagePROGRAF GP series (graphics)",
+    "finishers": [],
+    "pod_paper": [],
+    "notes": "11-colour CG line; quote GP-2000 or GP-4000."
+  },
+  "CANON-IF-C3150": {
+    "product_name": "Canon imageFORCE C3150",
+    "finishers": [
+      "Inner / Booklet / Staple / Punch / Folder (imageFORCE C3150) — confirm regional finisher name"
+    ],
+    "pod_paper": [
+      "High-capacity cassettes / paper deck / long-sheet options (imageFORCE C3150) — on quote"
+    ],
+    "notes": "A3 50 ppm class; optional finishers and paper per Canon regional catalog."
+  },
+  "CANON-IF-C7165": {
+    "product_name": "Canon imageFORCE C7165",
+    "finishers": [
+      "Inner / Booklet / Staple / Punch / V-fold (imageFORCE C7165) — confirm regional"
+    ],
+    "pod_paper": [
+      "High-capacity feed / deck; long-sheet tray (e.g. 1300 mm) where optional"
+    ],
+    "notes": "A3 65–70 ppm class; full finishing per datasheet; confirm market-specific SKUs."
+  },
+  "CANON-IF-C1333-SER": {
+    "product_name": "Canon imageFORCE C1333 series",
+    "finishers": [],
+    "pod_paper": [
+      "Optional additional cassette (e.g. 550-sheet PF) — C1333 series"
+    ],
+    "notes": "Compact A4; C1333F (MFP) vs C1333P (print) — align quote line to chosen model."
+  },
+  "CANON-IF-C5100-SER": {
+    "product_name": "Canon imageFORCE C5100 series",
+    "finishers": [
+      "Staple, saddle, hole punch, fold, booklet (imageFORCE C5100) — per option guide"
+    ],
+    "pod_paper": [
+      "Paper deck / high-capacity feed (imageFORCE C5100) — on quote"
+    ],
+    "notes": "Series C5140/5150/5160/5170; optional imagePASS; confirm tier and finisher list."
+  },
+  "CANON-IF-C611-SER": {
+    "product_name": "Canon imageFORCE C611 series",
+    "finishers": [
+      "Optional internal and external finishers (imageFORCE C611) — confirm regional"
+    ],
+    "pod_paper": [
+      "Cassette and high-capacity options to ~2300+ sheets (imageFORCE C611)"
+    ],
+    "notes": "A4 high-speed; model letters vary by region (e.g. C611 vs regional variants)."
+  },
+  "CANON-IRDX-C478-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX C478 series",
+    "finishers": [
+      "C478iZ — finisher with staple and offset (iR-ADV DX C478)"
+    ],
+    "pod_paper": [
+      "Additional trays; max ~2100+ sheets (iR-ADV DX C478 series) — on quote"
+    ],
+    "notes": "C478i base; C478iZ includes internal finisher — confirm on quote line."
+  },
+  "CANON-IRDX-C3900-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX C3900 series",
+    "finishers": [
+      "Staple Finisher-AE1 (iR-ADV DX C3900 series)",
+      "Booklet Finisher-AE1 (iR-ADV DX C3900 series)"
+    ],
+    "pod_paper": [
+      "Cassette / deck / POD-style modules (iR-ADV DX C3900) — on quote"
+    ],
+    "notes": "A3; models C3922i–C3935i; C-EXV 64 family toners; confirm DADF options."
+  },
+  "CANON-IRDX-C3730-ES": {
+    "product_name": "Canon imageRUNNER ADVANCE DX C3730i ES",
+    "finishers": [
+      "Inner Finisher-K1 ES (iR-ADV DX C3730i ES) — where offered"
+    ],
+    "pod_paper": [
+      "Cassette and MP tray; standard ~1200 sheets (iR-ADV DX C3730i ES) — on quote"
+    ],
+    "notes": "ES remanufactured line; over 90% reused materials (Canon ES positioning)."
+  },
+  "CANON-IRDX-C259359-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX C259/C359 series",
+    "finishers": [
+      "Internal / external finishers (iR-ADV DX C259/C359) — confirm regional"
+    ],
+    "pod_paper": [
+      "Trays to ~2300+ sheets (iR-ADV DX C259/C359 series) — on quote"
+    ],
+    "notes": "A4 compact; C359P print-only where listed — not an MFP."
+  },
+  "CANON-IRAC55-ES2-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE C5500 ES II series",
+    "finishers": [
+      "Inner Finisher-H1 ES (iR-ADV C5500 ES II) — where offered",
+      "Booklet Finisher-Y1 ES (iR-ADV C5500 ES II) — where offered",
+      "Staple Finisher-Y1 ES (iR-ADV C5500 ES II) — where offered"
+    ],
+    "pod_paper": [
+      "A3 high-capacity and finisher output capacity — on quote"
+    ],
+    "notes": "ES+ II reman line (e.g. C5540i / C5560i ES+ II). C-EXV 51 class toners."
+  },
+  "CANON-IR-C3326I": {
+    "product_name": "Canon imageRUNNER C3326i",
+    "finishers": [
+      "Optional staple / booklet / punch finishers (imageRUNNER C3326i) — regional"
+    ],
+    "pod_paper": [
+      "Cassettes, MP tray, max ~2300+ sheets (imageRUNNER C3326i) — on quote"
+    ],
+    "notes": "A3 26 ppm class; DADF options; optional 256 GB SSD where offered."
+  },
+  "CANON-IRDX-719619529-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX 719/619/529 Series",
+    "finishers": [
+      "Optional staple / booklet / inner finishers (iR-ADV DX 719/619/529) — confirm regional finisher SKUs"
+    ],
+    "pod_paper": [
+      "Additional cassettes / high-capacity feed; long-sheet options where offered — on quote"
+    ],
+    "notes": "A4 mono ADV DX family; pick 529i / 619i / 719i speed tier on quote."
+  },
+  "CANON-IRDX-6980I": {
+    "product_name": "Canon imageRUNNER ADVANCE DX 6980i",
+    "finishers": [
+      "Staple / booklet / punch / shift-sort finishers (iR-ADV DX 6980i) — confirm option guide"
+    ],
+    "pod_paper": [
+      "Large capacity paper decks and mailbox/stacker options — on quote"
+    ],
+    "notes": "A3 high-volume mono MFP; confirm exact finisher model numbers for your territory."
+  },
+  "CANON-IRDX-4900-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX 4900 Series",
+    "finishers": [
+      "Staple / booklet / punch finishers (iR-ADV DX 4900 series) — regional"
+    ],
+    "pod_paper": [
+      "Paper decks and high-capacity trays — on quote"
+    ],
+    "notes": "A3 mono; confirm 6860i / 6870i (or regional equivalents) on quote line."
+  },
+  "CANON-IRDX-4800-SER": {
+    "product_name": "Canon imageRUNNER ADVANCE DX 4800 Series",
+    "finishers": [
+      "Staple finisher (iR-ADV DX 4800 series)",
+      "Booklet finisher (iR-ADV DX 4800 series) — where offered"
+    ],
+    "pod_paper": [
+      "Additional cassettes; max paper to multi-thousand sheets — on quote"
+    ],
+    "notes": "A3 mono; models 4825i / 4835i / 4845i — pick tier on quote."
+  },
+  "CANON-IF-1440-SER": {
+    "product_name": "Canon imageFORCE 1440 Series",
+    "finishers": [],
+    "pod_paper": [
+      "Optional extra cassette / pedestal — imageFORCE 1440 — on quote"
+    ],
+    "notes": "Compact A4 mono MFP; confirm IF1440 vs IF1440F (fax) per market."
+  },
+  "CANON-IF-1643-SER": {
+    "product_name": "Canon imageFORCE 1643 Series",
+    "finishers": [],
+    "pod_paper": [
+      "Paper capacity upgrades — imageFORCE 1643 — on quote"
+    ],
+    "notes": "A4 mono SMB line; confirm ADF vs SPADF where listed."
+  },
+  "CANON-IF-6100-SER": {
+    "product_name": "Canon imageFORCE 6100 Series",
+    "finishers": [
+      "Optional staple / booklet / punch (imageFORCE 6100) — confirm regional"
+    ],
+    "pod_paper": [
+      "High-capacity feed and deck options — imageFORCE 6100 — on quote"
+    ],
+    "notes": "A3 mono; pick model speed tier (e.g. IF6140 / IF6150 / IF6160 class) on quote."
+  },
+  "CANON-IF-710-SER": {
+    "product_name": "Canon imageFORCE 710 Series",
+    "finishers": [
+      "Optional finishers (imageFORCE 710) — confirm regional catalog"
+    ],
+    "pod_paper": [
+      "Trays and high-capacity options — imageFORCE 710 — on quote"
+    ],
+    "notes": "A4 mono workgroup MFP; model variants market-specific."
+  },
+  "CANON-IF-8100-SER": {
+    "product_name": "Canon imageFORCE 8100 Series",
+    "finishers": [
+      "Production-style staple / booklet / punch stack (imageFORCE 8100) — confirm option list"
+    ],
+    "pod_paper": [
+      "High-capacity input / output modules — imageFORCE 8100 — on quote"
+    ],
+    "notes": "Very high-speed A3 mono; ~86–105 ppm class by model — confirm SKU."
+  },
+  "CANON-IR-2900-SER": {
+    "product_name": "Canon imageRUNNER 2900 Series",
+    "finishers": [
+      "Optional inner finisher with staple (imageRUNNER 2900) — where offered"
+    ],
+    "pod_paper": [
+      "Cassette and pedestal options to ~2300+ sheets — imageRUNNER 2900 — on quote"
+    ],
+    "notes": "A3 mono; replaces 2700 positioning in many regions — confirm 2925/2930/2945 naming."
+  },
+  "CANON-IR-2700-SER": {
+    "product_name": "Canon imageRUNNER 2700 Series",
+    "finishers": [
+      "Optional inner finisher and stapling (imageRUNNER 2700) — regional"
+    ],
+    "pod_paper": [
+      "Cassette upgrades; max ~2300 sheets — imageRUNNER 2700 — on quote"
+    ],
+    "notes": "A3 mono; 2725i / 2730i / 2745i — pick speed tier on quote."
+  },
+  "CANON-IR-2425-SER": {
+    "product_name": "Canon imageRUNNER 2425 Series",
+    "finishers": [
+      "Optional staple / punch finishers (imageRUNNER 2425) — confirm regional"
+    ],
+    "pod_paper": [
+      "Additional trays — imageRUNNER 2425 — on quote"
+    ],
+    "notes": "A3 mono cloud-connected line; Gen I vs II is a separate product record."
+  },
+  "CANON-IR-2425II-SER": {
+    "product_name": "Canon imageRUNNER 2425 II Series",
+    "finishers": [
+      "Optional inner / external finishers (imageRUNNER 2425 II) — confirm regional"
+    ],
+    "pod_paper": [
+      "Cassette and pedestal — imageRUNNER 2425 II — on quote"
+    ],
+    "notes": "A3 mono Gen II; high-speed scan positioning with DADF."
+  },
+  "CANON-IR-2224-SER": {
+    "product_name": "Canon imageRUNNER 2224 Series",
+    "finishers": [
+      "Optional finishers (imageRUNNER 2224) — limited vs higher series; confirm catalog"
+    ],
+    "pod_paper": [
+      "Tray upgrades to ~600+ sheets — imageRUNNER 2224 — on quote"
+    ],
+    "notes": "Entry A3 mono; 2224 / 2224i / 2224N variants — align quote to SKU."
+  },
+  "CANON-IR-2224II-SER": {
+    "product_name": "Canon imageRUNNER 2224 II Series",
+    "finishers": [
+      "Optional finishers (imageRUNNER 2224 II) — confirm regional"
+    ],
+    "pod_paper": [
+      "Paper options — imageRUNNER 2224 II — on quote"
+    ],
+    "notes": "Gen II refresh of 2224 family; confirm model suffixes in ME catalog."
+  },
+  "CANON-IR-1643II-SER": {
+    "product_name": "Canon imageRUNNER 1643 II Series",
+    "finishers": [],
+    "pod_paper": [
+      "Extra cassette; high input capacity — imageRUNNER 1643 II — on quote"
+    ],
+    "notes": "A4 mono; 1643i II vs 1643iF II (fax) — pick on quote line."
+  }
+}

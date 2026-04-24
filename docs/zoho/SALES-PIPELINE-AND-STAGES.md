@@ -28,19 +28,27 @@ Keep **stage names short and in plain language** your team will actually say on 
 | **Reporting** | CRM list views, dashboards, and **Power BI** — slice/filter by **Line of business**. |
 | **Rep scope** | Optional: profiles + workflows so a rep’s **Line of business** defaults or is validated against a **User** field (see workshop notes). |
 
-**Stage order** (versioned in [`tools/zoho/pipelines_seed.json`](../../tools/zoho/pipelines_seed.json)):
+**Stage order** (versioned in [`tools/zoho/pipelines_seed.json`](../../tools/zoho/pipelines_seed.json)) — **7 stages** (kept simple; **Value Proposition** is where reps also confirm **decision makers**):
 
 1. Qualification  
 2. Needs Analysis  
 3. Value Proposition  
-4. Identify Decision Makers  
-5. Proposal/Price Quote  
-6. Negotiation/Review  
-7. Closed Won  
-8. Closed Lost  
-9. Closed Lost to Competition  
+4. Proposal/Price Quote  
+5. Negotiation/Review  
+6. Closed Won  
+7. Closed Lost  
 
-After edits to the seed file, run **`provision_pipelines.py --sync`** (requires settings OAuth scopes).
+**Competitive losses** use **Closed Lost** plus **Competitor** and **Lost Reason** (no separate stage). After edits to the seed file, run **`provision_pipelines.py --sync`** (requires settings OAuth scopes).
+
+### Stage reminders (so reps don’t forget to update)
+
+Keep **few stages** *and* nudge behavior:
+
+1. **Weekly pipeline review** (already in your checklist) — manager asks “what moved this week?” and fixes stale stages.  
+2. **Zoho workflow (recommended):** **Setup → Automation → Workflow Rules** on **Deals** — e.g. *when* **Stage** is unchanged for **N days** (or **Modified Time** / last activity), **send email** to owner or **create Task** “Review deal stage.” Add one rule per critical open stage if you want tighter nudges.  
+3. **Training:** “After every customer meeting, update Stage or log an activity the same day.”
+
+Deluge timing rules vary by edition; start with **7-day** inactivity on open stages and tune down if noisy.
 
 ### 2.1 Retiring extra pipelines (Production / MPS) in Zoho
 
@@ -50,9 +58,9 @@ If you previously had **separate pipelines** per line, Zoho does not allow a sim
 - **Docs:** [Transfer and Delete a Pipeline (v8)](https://www.zoho.com/crm/developer/docs/api/v8/transfer-and-delete-pipeline.html)  
 - Map each **stage** in the old pipeline to the **same** stage ID in **Standard** (identity mapping) when both use the same Deals **Stage** picklist.
 
-### 2.2 Archived: `pipelines_seed.radiology.json`
+### 2.2 Archived: `archive/pipelines_seed.radiology.json`
 
-A separate **Radiology** pipeline is **not** required when sectors are modeled with **Line of business**. The radiology seed file is kept only as a historical reference if you ever split pipelines again.
+A separate **Radiology** pipeline is **not** required when sectors are modeled with **Line of business**. The file lives at [`../../tools/zoho/archive/pipelines_seed.radiology.json`](../../tools/zoho/archive/pipelines_seed.radiology.json) (historical reference only; use `provision_pipelines.py --seed` from `tools/zoho` if you ever reintroduce a split).
 
 Set **probabilities** and **forecast categories** per stage in **Deals → layout → Stage–probability mapping** once stage names are final.
 

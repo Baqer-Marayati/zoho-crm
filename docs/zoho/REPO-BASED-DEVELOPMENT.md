@@ -21,7 +21,7 @@
 ## What the AI in Cursor can do
 
 - Author and edit **files in this repo** (code, docs, M queries, checklists).
-- You run **terminal commands** in your environment; the AI does **not** have your Zoho session.
+- When OAuth is configured locally (`tools/zoho/.env`), agents can also **run** `make` targets and `tools/zoho` scripts for idempotent or read-only API work. You still use the **Zoho browser UI** for org-only actions and for anything not scripted here.
 
 ## What is *not* realistic
 

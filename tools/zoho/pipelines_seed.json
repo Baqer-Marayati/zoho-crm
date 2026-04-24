@@ -9,13 +9,12 @@
         "Qualification",
         "Needs Analysis",
         "Value Proposition",
-        "Identify Decision Makers",
         "Proposal/Price Quote",
         "Negotiation/Review",
         "Closed Won",
-        "Closed Lost",
-        "Closed Lost to Competition"
-      ]
+        "Closed Lost"
+      ],
+      "notes": "7 deal stages (2026-04): dropped Identify Decision Makers (same work lives under Value Proposition) and Closed Lost to Competition (use Closed Lost + Competitor / Lost Reason). Legacy picklist values may remain in org for old records — move deals then deactivate unused options in Setup if desired."
     }
   ]
 }

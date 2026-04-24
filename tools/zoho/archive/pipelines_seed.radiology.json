@@ -1,5 +1,5 @@
 {
-  "comment": "ARCHIVED (2026-04-23): Radiology is a Line of business value, not a separate pipeline. Kept for reference only. If you ever split pipelines again: stage labels must exist on Deals → Stage. Run: ./venv/bin/python provision_pipelines.py --seed pipelines_seed.radiology.json",
+  "comment": "ARCHIVED (2026-04-23): Radiology is a Line of business value, not a separate pipeline. Kept for reference only. If you ever split pipelines again: stage labels must exist on Deals → Stage. From tools/zoho: ./venv/bin/python provision_pipelines.py --seed archive/pipelines_seed.radiology.json",
   "pipelines": [
     {
       "display_value": "Radiology",

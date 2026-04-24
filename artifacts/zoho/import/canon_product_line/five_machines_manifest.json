@@ -1,0 +1,70 @@
+{
+  "zoho_import_csv": "artifacts/zoho/import/canon_products_five_machines_en.csv",
+  "products": [
+    {
+      "key": "vp6k_titan",
+      "product_name": "Canon varioPRINT 6000 TITAN",
+      "product_code": "CANON-VP6K-TITAN",
+      "speed_tiers_note": "Set quote line picklists or text for chosen tier.",
+      "collateral_suggested_filenames": [
+        "CANON-VP6K-TITAN_hero.jpg",
+        "CANON-VP6K-TITAN_datasheet_en.pdf",
+        "CANON-VP6K-TITAN_brochure_en.pdf"
+      ],
+      "source_engine_rows": 4,
+      "source_option_rows": 2
+    },
+    {
+      "key": "ip_v1000",
+      "product_name": "Canon imagePRESS V1000",
+      "product_code": "CANON-IP-V1000",
+      "speed_tiers_note": "Set quote line picklists or text for chosen tier.",
+      "collateral_suggested_filenames": [
+        "CANON-IP-V1000_hero.jpg",
+        "CANON-IP-V1000_datasheet_en.pdf",
+        "CANON-IP-V1000_brochure_en.pdf"
+      ],
+      "source_engine_rows": 1,
+      "source_option_rows": 2
+    },
+    {
+      "key": "ip_v1350",
+      "product_name": "Canon imagePRESS V1350",
+      "product_code": "CANON-IP-V1350",
+      "speed_tiers_note": "Set quote line picklists or text for chosen tier.",
+      "collateral_suggested_filenames": [
+        "CANON-IP-V1350_hero.jpg",
+        "CANON-IP-V1350_datasheet_en.pdf",
+        "CANON-IP-V1350_brochure_en.pdf"
+      ],
+      "source_engine_rows": 1,
+      "source_option_rows": 2
+    },
+    {
+      "key": "ip_v900_series",
+      "product_name": "Canon imagePRESS V900 series",
+      "product_code": "CANON-IP-V9K-SER",
+      "speed_tiers_note": "Set quote line picklists or text for chosen tier.",
+      "collateral_suggested_filenames": [
+        "CANON-IP-V9K-SER_hero.jpg",
+        "CANON-IP-V9K-SER_datasheet_en.pdf",
+        "CANON-IP-V9K-SER_brochure_en.pdf"
+      ],
+      "source_engine_rows": 3,
+      "source_option_rows": 3
+    },
+    {
+      "key": "vp140_series",
+      "product_name": "Canon varioPRINT 140 series",
+      "product_code": "CANON-VP140-SER",
+      "speed_tiers_note": "Set quote line picklists or text for chosen tier.",
+      "collateral_suggested_filenames": [
+        "CANON-VP140-SER_hero.jpg",
+        "CANON-VP140-SER_datasheet_en.pdf",
+        "CANON-VP140-SER_brochure_en.pdf"
+      ],
+      "source_engine_rows": 3,
+      "source_option_rows": 2
+    }
+  ]
+}
