@@ -1,0 +1,32 @@
+Quotes — Module Builder / layout (remembered 2026-04-24)
+============================================================
+
+Source of truth: Zoho live metadata (GET /crm/v8/settings/layouts) + your Module Builder work.
+
+- Layout: **Standard** (layout id 7353692000000091017).
+- **Quote Number** (api: Quote_Number): type **autonumber** in Zoho — use for official series/numbering.
+- **Reference** (api: **Subject**): type **text**, label **Reference** — client script in
+  quote_reference_autofill.js fills with **Q + 9 alnum** (10 chars total) on create.
+- **Quote Information** (create) field order in API (top to bottom) includes: Quote Owner,
+  Quote Number, Reference (Subject), Deal Name, Quote Stage, Valid Until, Team, Contact Name,
+  Created By, Account Name, … Payment Terms, Tag, etc.
+- **Address Information**, **Quoted Items** (line: Product (Machine), Config 1/2, Model / speed, …),
+  **Terms and Conditions**, **Description Information** — unchanged at high level; see Zoho
+  for exact column placement.
+
+When editing layouts again: if you use **Auto Number** for Quote Number, keep **Reference (Subject)**
+as the human/merge title or use Quote Number in PDFs via ${Quotes.Quote_Number} as you prefer.
+
+Fields removed from Quotes **Standard** layout (off form; API `type` = unused) — 2026-04-24
+-----------------------------------------------------------------------------------------------
+From live `GET /settings/fields?module=Quotes&type=unused` vs layout `7353692000000091017`.
+
+1. **Carrier** (`Carrier`, picklist, standard)
+2. **Contract Folder URL** (`Contract_Folder_URL`, text, **custom** — was added in Phase 3; still in module, not on create layout)
+3. **Shipping address block** (all standard) — not on layout:
+   - `Shipping_Address`
+   - `Shipping_Street`, `Shipping_City`, `Shipping_State`, `Shipping_Code`, `Shipping_Country`
+   - `Shipping_Flat_House_No_Building_Apartment_Name`
+   - `Shipping_Coordinates`, `Shipping_Latitude`, `Shipping_Longitude`
+
+**Still on layout:** full **Billing** address fields (see Zoho), **Quote Number** (autonumber), **Reference** (`Subject`), etc.

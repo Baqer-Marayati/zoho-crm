@@ -1,0 +1,144 @@
+void automation.quoted_items_sync_machine_sku(string quoteId)
+{
+	/*
+	 * Quote subform: keep **Product Name** (lookup) aligned with the line **Machine_SKU** picklist
+	 * (label: "Product (Machine)").
+	 *
+	 * Primary path (reps): pick the Product (Machine) value "<Product_Code> - <Product_Name>".
+	 *    -> Search Products by Product_Code -> set **Product_Name** on the line (lookup).
+	 * Legacy / imports: **Product Name** is set but picklist is empty
+	 *    -> backfill **Machine_SKU** from the Product.
+	 * `opt.trigger = list()` prevents workflow loops.
+	 */
+	qid = quoteId.toLong();
+	quote = zoho.crm.getRecordById("Quotes", qid);
+	if(quote == null)
+	{
+		return;
+	}
+	/*
+	 * Keep Valid Until deterministic: always 14 days from Created Time.
+	 * This runs on create/edit and only writes when the date is different.
+	 */
+	createdRaw = quote.get("Created_Time");
+	targetValid = "";
+	if(createdRaw != null)
+	{
+		targetValid = createdRaw.addDay(14).toString("yyyy-MM-dd");
+	}
+	currValidRaw = quote.get("Valid_Till");
+	currValid = "";
+	if(currValidRaw != null)
+	{
+		currValid = currValidRaw.toString();
+		if(currValid.length() >= 10)
+		{
+			currValid = currValid.substring(0,10);
+		}
+	}
+	validChanged = false;
+	if(targetValid != "" && currValid != targetValid)
+	{
+		validChanged = true;
+	}
+	items = quote.get("Quoted_Items");
+	newItems = list();
+	itemsChanged = false;
+	if(items != null && items.size() > 0)
+	{
+		for each item in items
+		{
+			keep = item;
+			msv0 = item.get("Machine_SKU");
+			pLook = item.get("Product_Name");
+			if(msv0 != null && msv0.toString().trim() != "")
+			{
+				raw = msv0.toString().trim();
+				pos = raw.indexOf(" - ");
+				if(pos > 0)
+				{
+					code = raw.substring(0, pos).trim();
+				}
+				else
+				{
+					code = raw;
+				}
+				if(code != null && code != "")
+				{
+					crit = "(Product_Code:equals:" + code + ")";
+					sr = zoho.crm.searchRecords("Products", crit);
+					if(sr != null && sr.size() > 0)
+					{
+						pr = sr.get(0);
+						pid = pr.get("id");
+						needP = true;
+						if(pLook != null)
+						{
+							ex = pLook.get("id");
+							if(ex != null && (ex + "") == (pid + ""))
+							{
+								needP = false;
+							}
+						}
+						if(needP)
+						{
+							lu = Map();
+							lu.put("id", pid);
+							keep.put("Product_Name", lu);
+							itemsChanged = true;
+						}
+					}
+				}
+			}
+			else if(pLook != null)
+			{
+				pid2 = pLook.get("id");
+				if(pid2 != null)
+				{
+					pr2 = zoho.crm.getRecordById("Products", pid2.toLong());
+					if(pr2 != null)
+					{
+						c2 = pr2.get("Product_Code");
+						pn2 = pr2.get("Product_Name");
+						if(c2 != null && c2 != "")
+						{
+							if(pn2 == null)
+							{
+								pn2 = "";
+							}
+							r2 = c2.toString() + " - " + pn2.toString();
+							if(r2.length() > 255)
+							{
+								r2 = r2.substring(0, 255);
+							}
+							cur2 = item.get("Machine_SKU");
+							if(cur2 == null || (cur2 + "") != r2)
+							{
+								keep.put("Machine_SKU", r2);
+								itemsChanged = true;
+							}
+						}
+					}
+				}
+			}
+			newItems.add(keep);
+		}
+	}
+	if(!itemsChanged && !validChanged)
+	{
+		return;
+	}
+	upd = Map();
+	if(itemsChanged)
+	{
+		upd.put("Quoted_Items", newItems);
+	}
+	if(validChanged)
+	{
+		upd.put("Valid_Till", targetValid);
+	}
+	opt = Map();
+	opt.put("trigger", list());
+	resp = zoho.crm.updateRecord("Quotes", qid, upd, opt);
+	return;
+}
