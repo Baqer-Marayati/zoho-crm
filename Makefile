@@ -1,5 +1,5 @@
 # Convenience targets — requires GNU Make (macOS has it)
-.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-provision-teamspace-direct-department zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-audit-lead-conversion zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
+.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-audit-lead-conversion zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
 
 # Default: show common Zoho targets (fast orientation after clone)
 help:
@@ -13,6 +13,7 @@ help:
 	@echo "  make zoho-phase3         - price book, layouts, etc. (see tools/zoho/README)"
 	@echo "  make zoho-phase3-products - Wave A import only (CSV must be ready)"
 	@echo "  make zoho-build-canon-*  - rebuild Canon EN / five-machines CSVs"
+	@echo "  make zoho-quote-template-replace - push Aljazeera Quotation PDF template to Zoho"
 	@echo "Full list: grep '^zoho' Makefile | cut -d: -f1 | sort -u"
 
 # Fast docs orientation for new contributors and agents
@@ -21,6 +22,7 @@ docs-help:
 	@echo "  docs/zoho/INDEX.md                  - single navigation page"
 	@echo "  docs/zoho/IMPLEMENTATION-CHECKLIST.md - phased execution order"
 	@echo "  docs/PROJECT-STATUS.md              - current scope and next actions"
+	@echo "  docs/zoho/REPO-LAYOUT.md            - folder map (docs, tools, artifacts)"
 	@echo "  tools/zoho/README.md                - script usage and make targets"
 	@echo "  docs/zoho/archive/README.md         - archived decisions and rounds"
 venv: zoho-venv
@@ -183,3 +185,11 @@ zoho-quote-client-script:
 # Field rename + push client script (latter no-ops with 401 until client_scripts scope is on the token)
 zoho-quote-reference-full:
 	cd tools/zoho && ./venv/bin/python provision_quote_reference_field.py && ./venv/bin/python provision_quote_client_script.py
+
+# Quote PDF — Aljazeera Quotation (inventory template HTML from provision_quote_template.py)
+zoho-quote-template:
+	cd tools/zoho && ./venv/bin/python provision_quote_template.py
+
+# Same but delete+recreate in Zoho (template id changes) — use after editing build_html()
+zoho-quote-template-replace:
+	cd tools/zoho && ./venv/bin/python provision_quote_template.py --replace

@@ -8,8 +8,10 @@ This repository holds **docs and automation** for a **Zoho CRM Professional** sa
 |------|--------|
 | `docs/zoho/` | Zoho and Power BI playbooks, architecture, developer workflow |
 | `docs/zoho/INDEX.md` | **Single docs entrypoint** for Zoho implementation |
+| `docs/zoho/REPO-LAYOUT.md` | **Folder map** (docs, tools, artifacts) |
 | `docs/zoho/IMPLEMENTATION-CHECKLIST.md` | **Phased go-live** — start here after workshops |
 | `docs/PROJECT-STATUS.md` | Current scope and next steps — update as you go |
+| `docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md` | **Quote PDF** (Aljazeera Quotation) — design + provisioning |
 | `docs/zoho/archive/` | Workshop **configuration rounds** (3–8) and other **historical** notes |
 | `tools/zoho/` | Python **API** helpers — OAuth, pipelines, product sync, one-off tools |
 | `tools/zoho/archive/` | Legacy or alternate **JSON** seeds (e.g. old pipeline layout) |

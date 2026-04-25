@@ -2,9 +2,19 @@
 """
 Create (or update) the Aljazeera Machinery sales quotation PDF template in Zoho CRM.
 
+The HTML in build_html() is the versioned source of truth. **Design invariants** (as of
+2026-04, see docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md):
+
+- Two **50% / 50%** column blocks: meta (Quote # | Date …) and address (Company | Bill To),
+  aligned so left labels line up with Company Details and the # column, right labels with Bill To.
+- **No grey** fill behind the address block; a thin **vertical** separator only.
+- **Created_Time** wrapped in a narrow overflow-hidden span for **date-only** in PDFs.
+- **Valid Until** may be a static phrase if the org does not drive Valid_Till on PDF.
+
 Usage:
     cd tools/zoho
-    ./venv/bin/python provision_quote_template.py [--dry-run]
+    ./venv/bin/python provision_quote_template.py [--dry-run] [--replace]
+    # or: make zoho-quote-template  /  make zoho-quote-template-replace  (from repo root)
 
 Flags:
     --dry-run   Print the payload instead of calling the API.
@@ -95,7 +105,7 @@ def build_html(logo_b64: str) -> str:
 <div style="background:#FFFFFF;min-height:277mm;width:100%;display:block;">
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
-  <!-- ── 1. HEADER: logo left · QUOTATION right ─────────────────────────── -->
+  <!-- ── 1. HEADER: logo left · SALES QUOTATION right ───────────────────── -->
   <tr>
     <td style="padding:44px 32px 20px 32px;">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -107,7 +117,7 @@ def build_html(logo_b64: str) -> str:
             <table border="0" cellspacing="0" cellpadding="0" width="100%">
               <tr><td height="52" style="font-size:0;line-height:0;">&nbsp;</td></tr>
               <tr><td align="right">
-                <div style="font-size:26px;font-weight:700;color:#1B2B4B;letter-spacing:2px;">QUOTATION</div>
+                <div style="font-size:22px;font-weight:700;color:#1B2B4B;letter-spacing:2px;">SALES QUOTATION</div>
               </td></tr>
             </table>
           </td>
@@ -121,38 +131,48 @@ def build_html(logo_b64: str) -> str:
     <div style="border-top:1px solid #DDE1E8;"></div>
   </td></tr>
 
-  <!-- ── 2. META: label : value grid ──────────────────────────────────────── -->
+  <!-- ── 2. META: aligned two-column grid ─────────────────────────────────── -->
   <tr>
     <td style="padding:14px 32px 16px;">
-      <table border="0" cellspacing="0" cellpadding="4" width="100%"
+      <table border="0" cellspacing="0" cellpadding="0" width="100%"
              style="font-size:12px;color:#1C2434;">
         <tr>
-          <td width="17%" style="color:#6B7280;">Quote #</td>
-          <td width="1%"  style="color:#6B7280;">:</td>
-          <td width="32%" style="font-weight:600;">${{!Quotes.Quote_Number}}</td>
-          <td width="17%" style="color:#6B7280;">Date</td>
-          <td width="1%"  style="color:#6B7280;">:</td>
-          <td width="32%" style="font-weight:600;">
-            <span style="display:inline-block;width:64px;max-width:64px;white-space:nowrap;overflow:hidden;vertical-align:bottom;">
-              ${{!Quotes.Created_Time}}
-            </span>
+          <td width="50%" valign="top" style="padding:0 8px 0 16px;">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+              <tr>
+                <td width="92" style="color:#6B7280;padding:0 0 8px;">Quote #</td>
+                <td style="font-weight:600;padding:0 0 8px;">${{!Quotes.Quote_Number}}</td>
+              </tr>
+              <tr>
+                <td style="color:#6B7280;padding:0 0 8px;">Payment Terms</td>
+                <td style="font-weight:600;padding:0 0 8px;">${{!Quotes.Payment_Terms}}</td>
+              </tr>
+              <tr>
+                <td style="color:#6B7280;padding:0;">Reference</td>
+                <td style="font-weight:600;padding:0;">${{!Quotes.Subject}}</td>
+              </tr>
+            </table>
           </td>
-        </tr>
-        <tr>
-          <td style="color:#6B7280;">Payment Terms</td>
-          <td style="color:#6B7280;">:</td>
-          <td style="font-weight:600;">${{!Quotes.Payment_Terms}}</td>
-          <td style="color:#6B7280;">Valid Until</td>
-          <td style="color:#6B7280;">:</td>
-          <td style="font-weight:600;">14 Days</td>
-        </tr>
-        <tr>
-          <td style="color:#6B7280;">Reference</td>
-          <td style="color:#6B7280;">:</td>
-          <td style="font-weight:600;">${{!Quotes.Subject}}</td>
-          <td style="color:#6B7280;">Sales Person</td>
-          <td style="color:#6B7280;">:</td>
-          <td style="font-weight:600;">${{!Quotes.Owner}}</td>
+          <td width="50%" valign="top" style="padding:0 0 0 24px;border-left:1px solid #DDE1E8;">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+              <tr>
+                <td width="96" style="color:#6B7280;padding:0 0 8px;">Date</td>
+                <td style="font-weight:600;padding:0 0 8px;">
+                  <span style="display:inline-block;width:64px;max-width:64px;white-space:nowrap;overflow:hidden;vertical-align:bottom;">
+                    ${{!Quotes.Created_Time}}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#6B7280;padding:0 0 8px;">Valid Until</td>
+                <td style="font-weight:600;padding:0 0 8px;">14 Days</td>
+              </tr>
+              <tr>
+                <td style="color:#6B7280;padding:0;">Sales Person</td>
+                <td style="font-weight:600;padding:0;">${{!Quotes.Owner}}</td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     </td>
@@ -163,28 +183,26 @@ def build_html(logo_b64: str) -> str:
     <div style="border-top:1px solid #DDE1E8;"></div>
   </td></tr>
 
-  <!-- ── 3. CUSTOMER DETAILS ───────────────────────────────────────────────── -->
+  <!-- ── 3. COMPANY DETAILS + BILL TO ─────────────────────────────────────── -->
   <tr>
     <td style="padding:10px 32px 12px;">
-      <table border="0" cellspacing="0" cellpadding="0" width="100%"
-             style="background:#F4F6FA;border:1px solid #DDE1E8;">
+      <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
-          <td width="40%" valign="top" style="padding:12px 18px 12px;">
+          <td width="50%" valign="top" style="padding:4px 8px 4px 16px;">
             <div style="font-size:10px;font-weight:700;color:#8894A8;
                         text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Company Details</div>
             <div style="font-size:13px;font-weight:700;color:#1C2434;margin-bottom:5px;">
-              ${{!org.company_name}}
+              Aljazeera Machinery
             </div>
             <div style="font-size:12px;color:#4B5B6E;line-height:1.5;">
-              ${{!org.street}}<br>
-              ${{!org.city}} ${{!org.state}}<br>
-              ${{!org.country}}<br>
+              Bakhtiari do Sadr - Alley 106<br>
+              House No 250/B/274<br>
+              Erbil, Iraq<br>
               +964 781 300 0007<br>
               info@aljazeeramachinery.com
             </div>
           </td>
-          <td width="10%">&nbsp;</td>
-          <td width="50%" valign="top" style="padding:12px 18px 12px 28px;border-left:1px solid #DDE1E8;">
+          <td width="50%" valign="top" style="padding:4px 4px 4px 24px;border-left:1px solid #DDE1E8;">
             <div style="font-size:10px;font-weight:700;color:#8894A8;
                         text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Bill To</div>
             <div style="font-size:13px;font-weight:700;color:#1C2434;margin-bottom:5px;">
@@ -239,9 +257,6 @@ def build_html(logo_b64: str) -> str:
             <td valign="top" style="padding:11px 12px;border-bottom:1px solid #E8ECF0;">
               <div style="font-weight:700;color:#1C2434;font-size:12px;">
                 ${{!Quotes.Quoted_Items.Product_Name.Product_Name}}
-              </div>
-              <div style="font-size:10px;color:#8894A8;margin-top:2px;">
-                ${{!Quotes.Quoted_Items.Product_Name.Product_Code}}
               </div>
               <div style="font-size:11px;color:#5A6878;margin-top:4px;line-height:1.5;">
                 ${{!Quotes.Quoted_Items.Description}}

@@ -66,9 +66,24 @@ Edit `pipelines_seed.json` so stage names match your org’s **Deals → Stage**
 
 **Quote header — Reference (system field `Subject`):** `provision_quote_reference_field.py` (`make zoho-quote-reference-field`) renames the label to **Reference**. `provision_quote_client_script.py` (`make zoho-quote-client-script` or `make zoho-quote-reference-full`) tries to **GET/PUT** the script from `../../artifacts/zoho/client_scripts/quote_reference_autofill.js` via `GET /settings/client_scripts/Quotes`; that endpoint often needs **`ZohoCRM.settings.client_scripts.ALL`** in addition to `settings` scopes (see `.env.example`). Re-ordering the field in the form is **UI-only**; the Layouts API cannot move system-mandatory **Subject** out of a section.
 
+**Quote PDF — Aljazeera Quotation (inventory / Quotes template):** `provision_quote_template.py` syncs the HTML from this repo to Zoho via **Settings → inventory_templates**. **Design invariants** (50/50 meta + address, no grey panel, date-only clip) are documented in `../../docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md`. Requires settings scopes (same family as other template APIs — use `zoho-doctor` if create fails).
+
+```bash
+# Dry-run: print API payload only
+./venv/bin/python provision_quote_template.py --dry-run
+
+# Create if missing (skip if a template with the same name already exists)
+./venv/bin/python provision_quote_template.py
+# or: make zoho-quote-template
+
+# After editing build_html() — delete and recreate (template ID will change)
+./venv/bin/python provision_quote_template.py --replace
+# or: make zoho-quote-template-replace
+```
+
 **CPQ Product Configurator (experimental):** `provision_cpq_product_configurator_pilot.py` (`make zoho-cpq-product-configurator-pilot`, `--dry-run` to print the resolved JSON only) calls the undocumented `POST /crm/v8/settings/cpq/product_configurators` endpoint. If Zoho returns 500, finish the same pilot in **Setup → Developer Hub → CPQ → Product Configurator**. To push the Deluge and workflow to Zoho via API, use **`provision_quoted_line_machine_sku_workflow.py`** (`make zoho-quote-line-machine-sku-wf`) with settings scopes, or follow `../../docs/zoho/QUOTE-LINE-AUTOMATION.md`. Optional: **`provision_quoted_line_hide_machine_sku_layout.py`** if you want the picklist hidden again (then `map_dependency` cannot apply — not compatible with the product-first layout).
 
-**Canon product descriptions:** Short catalog copy is in `build_canon_five_machines_csv.py` (`CURATED_DESCRIPTIONS`). Rebuild CSV + push to Zoho: `make zoho-build-canon-five-machines` then `make zoho-sync-canon-product-descriptions` (or `sync_canon_product_descriptions.py`).
+**Canon product descriptions:** Short catalog copy is in `build_canon_five_machines_csv.py` (`CURATED_DESCRIPTIONS`). Rebuild CSV + push to Zoho: `make zoho-build-canon-five-machines` then `make zoho-sync-canon-product-descriptions` (or `sync_canon_product_descriptions.py`). The **PDF** shows each line’s `Description` — if product copy in CRM changed but a quote line looks stale, re-save lines or see `../../docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md`.
 
 **Canon PDFs on Products:** `upload_canon_product_pdfs.py` posts `*.pdf` from `~/Dropbox/Work/Canon/Canon machine specs for SAP` subfolders to the matching product’s **Attachments** (`make zoho-upload-canon-product-pdfs`). Needs attachment create scope; re-run may duplicate files if Zoho allows.
 

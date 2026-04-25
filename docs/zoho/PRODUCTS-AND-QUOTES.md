@@ -61,6 +61,7 @@ Zoho separates **(A) what reps edit**, **(B) what appears on the generated PDF/e
 ### B. Quote PDF / print template (customer-facing)
 
 - Built under **Setup → Templates** (or **Print/Web Templates** / **Quote templates**, depending on your CRM edition and Next Gen vs Classic).
+- **This repo:** the **Aljazeera Quotation** inventory template HTML is versioned in `tools/zoho/provision_quote_template.py` and described in [`QUOTE-TEMPLATE-LEARNINGS.md`](./QUOTE-TEMPLATE-LEARNINGS.md) (layout rules, date clipping, `--replace` behavior).
 - The template controls **logo, fonts, footer, and which merge fields** appear — e.g. `${Quotes.Product Details}` style tables, individual line columns, subtotals, IQD formatting.
 - **Design levers:** add/remove **columns** on the product table (product name, qty, rate, amount, **line description**, your custom variant fields); add a **Terms** block; optional **second page** for legal text.
 - **Product description on PDF:** map the field you want (short summary vs full `Description`). If the PDF becomes cluttered, prefer **short line text** + **“see attached datasheet”** or link to **Contract Folder URL**.
@@ -78,6 +79,7 @@ Zoho separates **(A) what reps edit**, **(B) what appears on the generated PDF/e
 
 ## Related
 
+- [`QUOTE-TEMPLATE-LEARNINGS.md`](./QUOTE-TEMPLATE-LEARNINGS.md) — **customer PDF** (Aljazeera Quotation): design, provisioning, merge-field quirks  
 - [`QUOTE-LINE-EXTENSIONS.md`](./QUOTE-LINE-EXTENSIONS.md) — finishers & POD/paper on quote lines + product reference fields  
 - [`LEADS-AND-DEALS.md`](./LEADS-AND-DEALS.md)  
 - [`SALES-PIPELINE-AND-STAGES.md`](./SALES-PIPELINE-AND-STAGES.md)  

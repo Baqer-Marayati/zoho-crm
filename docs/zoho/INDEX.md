@@ -11,6 +11,7 @@ Use this page as the **single navigation entrypoint** for Zoho CRM work in this 
 
 ## Core implementation guides
 
+- **Repository layout (folder map):** [`REPO-LAYOUT.md`](./REPO-LAYOUT.md)
 - **Pipelines and stages:** [`SALES-PIPELINE-AND-STAGES.md`](./SALES-PIPELINE-AND-STAGES.md)
 - **Leads and deals:** [`LEADS-AND-DEALS.md`](./LEADS-AND-DEALS.md)
 - **Products and quotes:** [`PRODUCTS-AND-QUOTES.md`](./PRODUCTS-AND-QUOTES.md)

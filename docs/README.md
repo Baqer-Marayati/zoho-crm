@@ -5,7 +5,9 @@ If you are working on Zoho CRM implementation, start with [`zoho/INDEX.md`](./zo
 | Document | When to read it |
 |----------|-----------------|
 | [PROJECT-STATUS.md](./PROJECT-STATUS.md) | **First** — scope and next steps |
+| [zoho/REPO-LAYOUT.md](./zoho/REPO-LAYOUT.md) | **Folder map** — where docs, tools, and artifacts live |
 | [zoho/INDEX.md](./zoho/INDEX.md) | **Zoho single entrypoint** — canonical navigation across active and archived docs |
+| [zoho/QUOTE-TEMPLATE-LEARNINGS.md](./zoho/QUOTE-TEMPLATE-LEARNINGS.md) | **Quote PDF** — Aljazeera Quotation design + `provision_quote_template.py` |
 | [zoho/IMPLEMENTATION-CHECKLIST.md](./zoho/IMPLEMENTATION-CHECKLIST.md) | **Build order** — phased go-live from all workshops |
 | [zoho/PHASE2-AUTOMATED.md](./zoho/PHASE2-AUTOMATED.md) | **Phase 2 fields** — API script + tiny UI follow-up |
 | [zoho/DEVELOPER.md](./zoho/DEVELOPER.md) | **How to work in this repo** (venv, env files, what goes in Git) |
