@@ -43,7 +43,7 @@ def _logo_b64() -> str:
         if not LOGO_PATH.exists():
             print(f"[warn] Logo not found at {LOGO_PATH}, skipping logo embed.", file=sys.stderr)
             return ""
-        os.system(f'sips -Z 260 "{LOGO_PATH}" --out "{LOGO_SM_PATH}" > /dev/null 2>&1')
+        os.system(f'sips -Z 780 "{LOGO_PATH}" --out "{LOGO_SM_PATH}" > /dev/null 2>&1')
     data = LOGO_SM_PATH.read_bytes()
     return base64.b64encode(data).decode()
 
@@ -68,6 +68,10 @@ def _get_token(accounts: str, client_id: str, client_secret: str, refresh_token:
 # Design: clean document-style (inspired by Zylker Electronics reference).
 # White background, thin border card, logo top-left + QUOTATION top-right in navy,
 # label:value meta rows, polished customer panel, navy table header, navy Balance Due row.
+#
+# The PDF footer is rendered via Zoho’s pdfgen section (not an in-flow <tr>) so the bar
+# sits on the real page margin — percentage heights and “spacer” rows are ignored by the
+# PDF engine, which caused a large white gap below the in-flow footer.
 
 def build_html(logo_b64: str) -> str:
     logo_img = (
@@ -77,29 +81,35 @@ def build_html(logo_b64: str) -> str:
         else '<div style="font-size:18px;font-weight:700;color:#1B2B4B;">Aljazeera Machinery</div>'
     )
 
-    return f"""<table border="0" cellspacing="0" cellpadding="0" width="100%"
-  style="background:#EAECF0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-<tr><td align="center" style="padding:20px 12px;">
+    return f"""<style type="text/css">html,body{{margin:0;padding:0;height:100%;}}</style>
+<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%"
+  style="background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;min-height:100%;">
+<tr><td align="center" style="padding:0;vertical-align:top;">
 
 <!-- ═══ DOCUMENT CARD ═══════════════════════════════════════════════════════ -->
-<table border="0" cellspacing="0" cellpadding="0" width="760"
-  style="background:#FFFFFF;border:1px solid #C8CDD5;border-bottom:3px solid #C8CDD5;">
+<!--
+  min-height MUST be on a block-level element (div), NOT on <table>.
+  PDF engines (wkhtmltopdf / Chromium) silently ignore min-height on tables.
+  The div fills to page height; the inner table is layout-only.
+-->
+<div style="background:#FFFFFF;min-height:277mm;width:100%;display:block;">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
 
   <!-- ── 1. HEADER: logo left · QUOTATION right ─────────────────────────── -->
   <tr>
-    <td style="padding:28px 32px 20px 32px;">
+    <td style="padding:44px 32px 20px 32px;">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr>
           <td width="55%" valign="top">
             {logo_img}
-            <div style="font-size:11px;color:#6B7280;line-height:1.7;">
-              ${{!org.street}}<br>
-              ${{!org.city}} ${{!org.state}}<br>
-              ${{!org.country}}
-            </div>
           </td>
-          <td width="45%" valign="bottom" align="right">
-            <div style="font-size:26px;font-weight:700;color:#1B3C8C;letter-spacing:2px;">QUOTATION</div>
+          <td width="45%" valign="top" align="right">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+              <tr><td height="52" style="font-size:0;line-height:0;">&nbsp;</td></tr>
+              <tr><td align="right">
+                <div style="font-size:26px;font-weight:700;color:#1B2B4B;letter-spacing:2px;">QUOTATION</div>
+              </td></tr>
+            </table>
           </td>
         </tr>
       </table>
@@ -157,7 +167,7 @@ def build_html(logo_b64: str) -> str:
   <tr>
     <td style="padding:10px 32px 12px;">
       <table border="0" cellspacing="0" cellpadding="0" width="100%"
-             style="background:#F4F6FA;border:1px solid #DDE1E8;border-left:4px solid #1B3C8C;">
+             style="background:#F4F6FA;border:1px solid #DDE1E8;">
         <tr>
           <td width="40%" valign="top" style="padding:12px 18px 12px;">
             <div style="font-size:10px;font-weight:700;color:#8894A8;
@@ -332,20 +342,8 @@ def build_html(logo_b64: str) -> str:
     </td>
   </tr>
 
-  <!-- ── 8. FOOTER ────────────────────────────────────────────────────────── -->
-  <tr>
-    <td bgcolor="#F4F6FA"
-        style="padding:11px 32px;border-top:1px solid #DDE1E8;">
-      <table border="0" cellspacing="0" cellpadding="0" width="100%">
-        <tr>
-          <td style="font-size:11px;color:#8894A8;">${{!org.company_name}}</td>
-          <td align="right" style="font-size:11px;color:#8894A8;">info@aljazeeramachinery.com</td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-</table><!-- /DOCUMENT CARD -->
+</table>
+</div><!-- /DOCUMENT CARD -->
 </td></tr>
 </table>"""
 
