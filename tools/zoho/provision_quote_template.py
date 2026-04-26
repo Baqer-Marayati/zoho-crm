@@ -76,7 +76,9 @@ def _get_token(accounts: str, client_id: str, client_secret: str, refresh_token:
 
 # ── HTML Template ────────────────────────────────────────────────────────────
 # Design: clean document-style (inspired by Zylker Electronics reference).
-# White background, thin border card, logo top-left + QUOTATION top-right in navy,
+# White background, thin border card, logo top-left + QUOTATION top-right in navy
+# (spacer <td height> above "SALES QUOTATION" controls title vs first divider; see
+# docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md).
 # label:value meta rows, polished customer panel, navy table header, navy Balance Due row.
 #
 # The PDF footer is rendered via Zoho’s pdfgen section (not an in-flow <tr>) so the bar
@@ -115,7 +117,7 @@ def build_html(logo_b64: str) -> str:
           </td>
           <td width="45%" valign="top" align="right">
             <table border="0" cellspacing="0" cellpadding="0" width="100%">
-              <tr><td height="52" style="font-size:0;line-height:0;">&nbsp;</td></tr>
+              <tr><td height="72" style="font-size:0;line-height:0;">&nbsp;</td></tr>
               <tr><td align="right">
                 <div style="font-size:22px;font-weight:700;color:#1B2B4B;letter-spacing:2px;">SALES QUOTATION</div>
               </td></tr>

@@ -15,6 +15,7 @@ This is the **target** when editing HTML in `build_html()`. The PDF engine is no
 - **Company address** is **hardcoded** in the template (Erbil block + phone + email) for consistent customer-facing output; **Bill To** uses merge fields.
 - **Date only on PDF:** wrap `${!Quotes.Created_Time}` in a **narrow** `display:inline-block` with `white-space:nowrap;overflow:hidden` so the renderer does not show time (Zoho may emit full datetime; there is no date-only merge in all builds).
 - **Valid Until** may show a **static phrase** (e.g. `14 Days`) if the org does not drive `${!Quotes.Valid_Till}` reliably; keep business truth on the **record** via workflow/Deluge if needed.
+- **Header “SALES QUOTATION” (right):** A **spacer row** above the title (`<td height="N">` in the inner table) positions the text vertically vs the logo. **2026-04-26:** spacer **72px** (was 52px) so the title sits a bit **lower and closer to the first divider** under the header. If the PDF title looks too high or too low, adjust **only** this value — avoid changing outer header padding or the divider row unless the whole block needs to move.
 - **Line items:** avoid repeating **Product_Name** in the **Description**; omit a redundant **Product_Code** line under the name if the catalog/SKU is obvious elsewhere (policy can change — keep one source of truth in the script).
 - **Product descriptions:** PDF line text comes from the **line**; updating **Products** in CRM does not always refresh old quote lines — re-save lines or script updates if you need a refresh.
 

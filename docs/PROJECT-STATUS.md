@@ -6,7 +6,7 @@
 |------|--------|
 | **Stack** | Zoho CRM **Professional** (reps); **Power BI** (management reporting); this repo = docs + `tools/zoho` scripts |
 | **Source of truth** | Zoho org configuration and live data; Power BI published datasets — **not** fully reproducible from Git alone |
-| **Quote PDF (Aljazeera Quotation)** | **Standardized 2026-04** — HTML in `tools/zoho/provision_quote_template.py`; design rules in [`docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md`](./zoho/QUOTE-TEMPLATE-LEARNINGS.md); `make zoho-quote-template-replace` to push |
+| **Quote PDF (Aljazeera Quotation)** | **Standardized 2026-04** — HTML in `tools/zoho/provision_quote_template.py`; design rules in [`docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md`](./zoho/QUOTE-TEMPLATE-LEARNINGS.md); `make zoho-quote-template-replace` to push. **2026-04-26:** “SALES QUOTATION” title nudged lower (spacer 72px) and republished to Zoho. |
 
 ## MVP scope
 
