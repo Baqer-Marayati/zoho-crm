@@ -1,0 +1,17 @@
+# Leads — Industry picklist (OCRD list). One display value per line. Used by provision_leads_industry_sector.py
+University
+School
+Hospital
+Telecommunication
+Corporate
+Oil & Gas
+Food
+Hospitality
+Construction
+Payment Service
+Stationary
+Service Center
+Ministry
+Print House
+Bank
+Retail Shop

@@ -1,5 +1,5 @@
 # Convenience targets — requires GNU Make (macOS has it)
-.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-audit-lead-conversion zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
+.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-audit-lead-conversion zoho-lead-layout-hide zoho-lead-address-iraq zoho-lead-country-iraq-wf zoho-lead-country-iraq-client-script zoho-leads-industry-sector zoho-delete-lead-address-iraq zoho-delete-blueprints zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
 
 # Default: show common Zoho targets (fast orientation after clone)
 help:
@@ -87,6 +87,34 @@ zoho-phase2-tracking:
 zoho-audit-lead-conversion:
 	cd tools/zoho && ./venv/bin/python audit_lead_conversion_mapping.py
 
+# Move selected Standard Leads form fields to Unused (hide on Create/Edit) — see provision_lead_layout_hide_fields.py
+zoho-lead-layout-hide:
+	cd tools/zoho && ./venv/bin/python provision_lead_layout_hide_fields.py
+
+# Leads: workflow sets standard Address Country / Region to Iraq on every create/edit (see provision_lead_country_iraq_workflow.py)
+zoho-lead-country-iraq-wf:
+	cd tools/zoho && ./venv/bin/python provision_lead_country_iraq_workflow.py
+
+# Leads: client script sets/locks standard Address Country / Region to Iraq on create/edit forms
+zoho-lead-country-iraq-client-script:
+	cd tools/zoho && ./venv/bin/python provision_lead_country_iraq_client_script.py
+
+# Leads: Industry picklist (OCRD list) + Sector picklist — see provision_leads_industry_sector.py
+zoho-leads-industry-sector:
+	cd tools/zoho && ./venv/bin/python provision_leads_industry_sector.py
+
+# Add Iraq-specific Country / Province / City picklists to Standard Leads Address Information
+zoho-lead-address-iraq:
+	cd tools/zoho && ./venv/bin/python provision_lead_address_iraq.py
+
+# Remove Iraq custom Leads address picklists + map dependency (see delete_lead_address_iraq_fields.py)
+zoho-delete-lead-address-iraq:
+	cd tools/zoho && ./venv/bin/python delete_lead_address_iraq_fields.py
+
+# Delete all Blueprint definitions (see provision_delete_blueprints.py)
+zoho-delete-blueprints:
+	cd tools/zoho && ./venv/bin/python provision_delete_blueprints.py
+
 # Rebuild English Canon catalog CSV from * EN.rtf under Dropbox …/Canon machine specs for SAP
 zoho-build-canon-products-en:
 	cd tools/zoho && ./venv/bin/python build_canon_products_en_csv.py
@@ -165,6 +193,10 @@ zoho-quote-line-hide-sku:
 # Quoted_Items: Deluge + workflow to auto-fill Machine SKU (needs workflow + automation OAuth scopes)
 zoho-quote-line-machine-sku-wf:
 	cd tools/zoho && ./venv/bin/python provision_quoted_line_machine_sku_workflow.py
+
+# Quoted_Items: Deluge + workflow to build dynamic line Description from product configuration
+zoho-quote-line-description-wf:
+	cd tools/zoho && ./venv/bin/python provision_quote_line_description_workflow.py
 
 # CPQ (undocumented API): create a Product Configurator pilot rule — may 500; use --dry-run first
 zoho-cpq-product-configurator-pilot:
