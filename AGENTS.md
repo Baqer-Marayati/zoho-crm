@@ -33,7 +33,9 @@ Source: `GET /crm/v8/settings/layouts/{layout_id}` and `.../settings/fields?modu
 | `Country`           | Address - Country / Region | Address Information |
 | `State`             | Address - State / Province | Address Information |
 
-**Not layout-required (examples; reps can leave empty unless other rules apply):** `Owner`, `Salutation`, `Designation` (Title), `Full_Name` (synthetic), `Email`, `Website`, `Tag`, `Description`, address `Flat_House_No_Building_Apartment_Name`, `Street`, `Zip_Code`, `Latitude` / `Longitude`, etc.
+**`Full Name` (`Full_Name`) — important:** A **double-check** on `GET /crm/v8/settings/layouts/7353692000000091055?module=Leads` (2026-04-27) shows **`required: false`** for `Full_Name`, and **`view_type` has `create: false` and `edit: false`**, so in metadata this field is **not** on the Create/Edit form at all (Zoho Leads usually builds the display name from **First** + **Last**). The API therefore **does not** list it among the 10 layout-mandatory fields. If the Zoho **UI** shows **Full Name** as mandatory, that can be: an unsaved layout, a different layout/tab, a browser cache, or a UI state the REST layout payload has not picked up yet — **re-open the layout in Setup → Leads → Standard → mark required → Save** and re-run a layout GET, or confirm you are on **Standard** (only one Leads layout is active in this org).
+
+**All other non-mandatory on this layout (API `required` not `true` — 30 field rows), including** `Owner`, `Salutation`, `Designation` (Title), `Email`, `Website`, `Description`, `Full_Name`, address subfields `Street`, `Zip_Code`, `Flat_House_*`, `Latitude` / `Longitude`, plus system/reporting fields often hidden on the form (`Tag`, `id`, conversion fields, etc.). See `view_type` in the layout response for on-form vs hidden.
 
 **System mandatory (field definition, not the same as layout):** `Last_Name` is the only Leads field flagged `system_mandatory` in the fields API; other “required on save” behavior comes from the **layout** `required` flags above.
 
