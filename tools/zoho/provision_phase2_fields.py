@@ -14,6 +14,8 @@ Also:
     Standard Deals layout — for unified pipeline + sector filtering.
   - Appends any **new** CSV values (e.g. Radiology) to an existing **Leads** Line of business
     field via PATCH when possible.
+  - Appends new values to an existing **Deals** **Competitor** picklist from
+    `artifacts/zoho/picklists/competitors_template.csv` when the field already exists.
 
 What this does NOT configure via this script: lead conversion field mapping (that is org
 metadata; read/audit with `audit_lead_conversion_mapping.py` — mapping is on each Lead
@@ -247,6 +249,66 @@ def _get_deals_line_of_business_field_id(
     return str(f["id"]) if f and f.get("id") else None
 
 
+def _merge_deals_competitor_options(
+    session: requests.Session,
+    api_domain: str,
+    desired_display: list[str],
+    dry_run: bool,
+) -> bool:
+    """Append picklist options on Deals Competitor when CSV has new values."""
+    payload = _crm_get_fields(session, api_domain, "Deals")
+    f = _field_by_label(payload, DEAL_COMPETITOR_LABEL)
+    if not f or not f.get("id"):
+        return True
+    fid = str(f["id"])
+    existing = {
+        (o.get("display_value") or "").strip()
+        for o in (f.get("pick_list_values") or [])
+        if not _is_system_none(o)
+    }
+    to_add = [d for d in desired_display if d not in existing]
+    if not to_add:
+        print(f"Deals: '{DEAL_COMPETITOR_LABEL}' already has all CSV values; skip PATCH.")
+        return True
+    new_opts = _build_pick_values(to_add)
+    print(f"Deals: PATCH '{DEAL_COMPETITOR_LABEL}' — add options: {to_add}")
+    if dry_run:
+        return True
+    keep = [
+        {
+            "display_value": o.get("display_value"),
+            "actual_value": o.get("actual_value") or o.get("display_value"),
+            "id": str(o["id"]),
+        }
+        for o in (f.get("pick_list_values") or [])
+        if o.get("id") and not _is_system_none(o)
+    ]
+    merged = keep + [
+        {"display_value": x["display_value"], "actual_value": x["actual_value"]} for x in new_opts
+    ]
+    r = _crm(
+        session,
+        api_domain,
+        "PATCH",
+        f"/settings/fields/{fid}",
+        params={"module": "Deals"},
+        data=json.dumps({"fields": [{"id": fid, "pick_list_values": merged}]}),
+        headers={**session.headers, "Content-Type": "application/json"},
+    )
+    if not r.ok:
+        print(
+            f"PATCH Deals Competitor HTTP {r.status_code}: {r.text[:2000]}\n"
+            "  If this fails, add values in Setup → Deals → Competitor.",
+            file=sys.stderr,
+        )
+        return False
+    try:
+        print(json.dumps(r.json(), indent=2)[:2000])
+    except json.JSONDecodeError:
+        print(r.text[:1500])
+    return True
+
+
 def _merge_deal_line_of_business_options(
     session: requests.Session,
     api_domain: str,
@@ -385,7 +447,8 @@ def main() -> int:
     line_display = _read_picklist_csv(REPO_PICKLISTS / "line_of_business.csv")
     line_vals = _build_pick_values(line_display)
     lost_vals = _build_pick_values(_read_picklist_csv(REPO_PICKLISTS / "lost_reasons.csv"))
-    comp_vals = _build_pick_values(_read_picklist_csv(REPO_PICKLISTS / "competitors_template.csv"))
+    comp_display = _read_picklist_csv(REPO_PICKLISTS / "competitors_template.csv")
+    comp_vals = _build_pick_values(comp_display)
 
     lead_payload = _crm_get_fields(session, api_domain, "Leads")
     deal_payload = _crm_get_fields(session, api_domain, "Deals")
@@ -446,6 +509,13 @@ def main() -> int:
         print(
             "dry-run: would POST Line of business on Deals, then add it to Standard layout."
         )
+
+    if DEAL_COMPETITOR_LABEL.lower() in deal_labels or any(
+        fd.get("field_label") == DEAL_COMPETITOR_LABEL for fd in deal_create
+    ):
+        ok = _merge_deals_competitor_options(
+            session, api_domain, comp_display, args.dry_run
+        ) and ok
 
     if ok:
         print(

@@ -8,13 +8,13 @@
       "stages": [
         "Qualification",
         "Needs Analysis",
-        "Value Proposition",
-        "Proposal/Price Quote",
-        "Negotiation/Review",
+        "Solution / Value",
+        "Quote Sent",
+        "Negotiation",
         "Closed Won",
         "Closed Lost"
       ],
-      "notes": "7 deal stages (2026-04): dropped Identify Decision Makers (same work lives under Value Proposition) and Closed Lost to Competition (use Closed Lost + Competitor / Lost Reason). Legacy picklist values may remain in org for old records — move deals then deactivate unused options in Setup if desired."
+      "notes": "7 stages (2026-04-27): Solution/Value + Quote Sent + Negotiation (formal PDF sent = Quote Sent). Identify Decision Makers removed from pipeline and moved off the Standard layout; Closed Lost + Lost Reason + Competitor only. Legacy Stage picklist values may remain as unused options for historical data."
     }
   ]
 }

@@ -4,6 +4,7 @@
 # Local-only heavy clones (e.g. upstream SDK or sample repos) — do not re-add
 _reference/
 _build/
+.cache/
 
 # Secrets — never commit
 .env

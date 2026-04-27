@@ -56,7 +56,7 @@ Zoho separates **(A) what reps edit**, **(B) what appears on the generated PDF/e
 - **Practical pattern for your catalog**  
   - Keep the **Product `Description`** as a **short, stable** blurb (same for every quote that uses that product). **Do not** change the product record when the rep picks a speed or finisher; put those on the **quote line** (picklists + optional line description) so the PDF reflects the **configuration** without rewriting master data.  
   - Deep spec stays in **attachments** and **Compatible finishers / POD** text on the product (see `QUOTE-LINE-EXTENSIONS.md`).  
-  - Optional: a separate **“Line summary”** formula or text on the line if you need a one-line PDF snippet built from product + picks.
+  - The quote-line **Description** is rebuilt from **Product + Model / speed + Configuration 1 + Configuration 2** in the same Deluge as **Product (Machine)** / Machine SKU sync (`artifacts/zoho/deluge/quoted_items_sync_machine_sku.deluge`), so one quote workflow is enough. The master Product `Description` stays stable; only the line text changes.
 
 ### B. Quote PDF / print template (customer-facing)
 

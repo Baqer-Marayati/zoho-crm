@@ -63,6 +63,10 @@ make zoho-quoted-line-deps
 
 4. If you use a **Client Script** on Quotes/Quoted Items, try **disabling** it temporarily. Scripts can block or override picklist / dependent-field behavior while you test.
 
+5. **Model / speed shows “None” or only “- Not applicable -”** for a product (e.g. `CANON-IP-V1350`): the parent picklist in map dependency must be the field with **api_name `Machine_SKU`** (label **Product (Machine)**) — not a duplicate field (e.g. `Machine_SKU1`). The provisioning script’s `MODEL_SPEED` map in `tools/zoho/provision_quoted_line_dependencies.py` must list that **Product_Code**; re-run `make zoho-quoted-line-deps` after updating it.
+
+6. **Model / speed and Configuration 1/2 show every option (not filtered per machine):** Zoho’s **map dependency** is tied to the **Product (Machine)** picklist (`Machine_SKU`), **not** the **Product Name** lookup. If you only set **Product Name**, the parent picklist is still empty **until the quote is saved** and the **workflow** fills **Product (Machine)** — so the UI may list all child values. **Fix (instant):** add the Client Script in `artifacts/zoho/client_scripts/quote_line_sync_machine_sku_on_product_name.js` to **Quotes → Quoted_Items → onCellChange** so `Machine_SKU` is set from the product record (or from the `(...CODE)` suffix on the name) as soon as **Product Name** changes — then dependent picklists filter without Save. **Alternatives:** pick **Product (Machine)** first on the line, **or** set **Product Name** then **Save** and re-open. After any `provision_quoted_line_dependencies.py` change, run `provision_quoted_line_product_first_layout.py` so the **layout** has the picklist option ids the map needs (`make zoho-quote-line-product-first-layout`). Remove any duplicate **Machine SKU** (`Machine_SKU1`) field from the line layout if it was created by mistake.
+
 ## Related
 
 - [`QUOTE-LINE-AUTOMATION.md`](./QUOTE-LINE-AUTOMATION.md) — Deluge function + workflow to set **Machine SKU** from the product.  

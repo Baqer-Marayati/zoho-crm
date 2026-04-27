@@ -1,0 +1,198 @@
+void automation.quoted_items_build_line_description(string quoteId)
+{
+	/*
+	 * STANDALONE / REFERENCE: same Description logic is merged into
+	 * quoted_items_sync_machine_sku.deluge so one Zoho function + one workflow
+	 * is enough (avoids a second function missing from "Functions - Quotes").
+	 * Prefer maintaining the combined file; keep this for copy-paste if needed.
+	 *
+	 * Quote subform: build the customer-facing line Description from the selected
+	 * product, Model / speed, Configuration 1, and Configuration 2.
+	 *
+	 * This updates only the quote line. It never rewrites the master Product record.
+	 * `opt.trigger = list()` prevents workflow loops after the quote is updated.
+	 */
+	qid = quoteId.toLong();
+	quote = zoho.crm.getRecordById("Quotes", qid);
+	if(quote == null)
+	{
+		return;
+	}
+	items = quote.get("Quoted_Items");
+	newItems = list();
+	itemsChanged = false;
+	nl = "\n";
+	if(items != null && items.size() > 0)
+	{
+		for each item in items
+		{
+			keep = item;
+			productName = "";
+			productDesc = "";
+			productId = "";
+			productCode = "";
+			pLook = item.get("Product_Name");
+			if(pLook != null)
+			{
+				pid0 = pLook.get("id");
+				if(pid0 != null)
+				{
+					productId = pid0.toString();
+				}
+				pn0 = pLook.get("name");
+				if(pn0 != null)
+				{
+					productName = pn0.toString().trim();
+				}
+			}
+			if(productId != "")
+			{
+				pr = zoho.crm.getRecordById("Products", productId.toLong());
+				if(pr != null)
+				{
+					pn1 = pr.get("Product_Name");
+					if(productName == "" && pn1 != null)
+					{
+						productName = pn1.toString().trim();
+					}
+					pc1 = pr.get("Product_Code");
+					if(pc1 != null)
+					{
+						productCode = pc1.toString().trim();
+					}
+					pd1 = pr.get("Description");
+					if(pd1 != null)
+					{
+						productDesc = pd1.toString().trim();
+					}
+				}
+			}
+			msv = item.get("Machine_SKU");
+			if((productName == "" || productDesc == "") && msv != null && msv.toString().trim() != "")
+			{
+				raw = msv.toString().trim();
+				pos = raw.indexOf(" - ");
+				if(pos > 0)
+				{
+					productCode = raw.substring(0,pos).trim();
+					if(productName == "" && raw.length() > pos + 3)
+					{
+						productName = raw.substring(pos + 3,raw.length()).trim();
+					}
+				}
+				else
+				{
+					productCode = raw;
+				}
+				if(productDesc == "" && productCode != "")
+				{
+					crit = "(Product_Code:equals:" + productCode + ")";
+					sr = zoho.crm.searchRecords("Products", crit);
+					if(sr != null && sr.size() > 0)
+					{
+						pr2 = sr.get(0);
+						if(productName == "")
+						{
+							pn2 = pr2.get("Product_Name");
+							if(pn2 != null)
+							{
+								productName = pn2.toString().trim();
+							}
+						}
+						pd2 = pr2.get("Description");
+						if(pd2 != null)
+						{
+							productDesc = pd2.toString().trim();
+						}
+					}
+				}
+			}
+			summary = "";
+			if(productName != "")
+			{
+				summary = productName;
+			}
+			if(productDesc != "")
+			{
+				if(summary != "")
+				{
+					summary = summary + nl;
+				}
+				summary = summary + productDesc;
+			}
+			configText = "";
+			model = "";
+			modelRaw = item.get("Model_speed");
+			if(modelRaw != null)
+			{
+				model = modelRaw.toString().trim();
+			}
+			if(model != "" && model != "- None -" && model != "- Not applicable -")
+			{
+				configText = "Selected model / speed: " + model;
+			}
+			c1 = "";
+			c1Raw = item.get("Finisher_line");
+			if(c1Raw != null)
+			{
+				c1 = c1Raw.toString().trim();
+			}
+			if(c1 != "" && c1 != "- None -" && c1 != "- Not applicable -")
+			{
+				if(configText != "")
+				{
+					configText = configText + nl;
+				}
+				configText = configText + "Configuration 1: " + c1;
+			}
+			c2 = "";
+			c2Raw = item.get("POD_paper_module_line");
+			if(c2Raw != null)
+			{
+				c2 = c2Raw.toString().trim();
+			}
+			if(c2 != "" && c2 != "- None -" && c2 != "- Not applicable -")
+			{
+				if(configText != "")
+				{
+					configText = configText + nl;
+				}
+				configText = configText + "Configuration 2: " + c2;
+			}
+			if(configText != "")
+			{
+				if(summary != "")
+				{
+					summary = summary + nl + nl;
+				}
+				summary = summary + configText;
+			}
+			if(summary.length() > 32000)
+			{
+				summary = summary.substring(0,32000);
+			}
+			curr = item.get("Description");
+			currText = "";
+			if(curr != null)
+			{
+				currText = curr.toString();
+			}
+			if(currText != summary)
+			{
+				keep.put("Description", summary);
+				itemsChanged = true;
+			}
+			newItems.add(keep);
+		}
+	}
+	if(!itemsChanged)
+	{
+		return;
+	}
+	upd = Map();
+	upd.put("Quoted_Items", newItems);
+	opt = Map();
+	opt.put("trigger", list());
+	resp = zoho.crm.updateRecord("Quotes", qid, upd, opt);
+	return;
+}

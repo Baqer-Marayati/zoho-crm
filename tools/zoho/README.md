@@ -11,6 +11,16 @@ Add **small, focused** scripts here: OAuth test, bulk import, health checks, web
 # or: make zoho-doctor
 ```
 
+**Efficient metadata context (recommended before Zoho work):** use the local metadata cache so agents/scripts read one compact summary instead of repeatedly calling metadata APIs or loading huge payloads.
+
+```bash
+make zoho-cache-summary   # auto-refreshes if stale, then prints cache paths
+make zoho-cache-refresh   # force-refresh after metadata changes
+make zoho-cache-status    # no API call; just shows cache age/path
+```
+
+The cache lives under `.cache/zoho/` and is gitignored. It stores metadata only (fields, layouts, pipelines, map dependencies), not customer records.
+
 ## Setup
 
 From repo root (installs Homebrew **Node**/`npx` for Zoho MCP’s `mcp-remote` bridge, then Python venv + deps):
@@ -49,6 +59,13 @@ Get **Client ID**, **Client Secret**, and a fresh **grant code** from [Zoho API 
 
 Edit `pipelines_seed.json` so stage names match your org’s **Deals → Stage** picklist labels.
 
+**Activate only the seed stages and rename their display labels:** many orgs need layout-level picklist rows updated first. This also moves omitted stages (for example, old decision-maker/lost-to-competition values) to Unused so they do not show in Stage View.
+
+```bash
+./venv/bin/python provision_deal_stage_picklist.py
+# or: make zoho-deal-stage-labels
+```
+
 **After you change stage lists** for existing pipelines, push updates to Zoho:
 
 ```bash
@@ -62,7 +79,7 @@ Edit `pipelines_seed.json` so stage names match your org’s **Deals → Stage**
 
 **Canon five-machine line:** `build_canon_five_machines_csv.py` merges the flat EN spec CSV into **five** Zoho products with SKUs (`canon_products_five_machines_en.csv`). See `../../artifacts/zoho/import/canon_product_line/README.md`. To **delete** the legacy 23 Wave-A product names in Zoho and **re-import** the five, run `sync_canon_five_products_zoho.py` or `make zoho-sync-canon-five-products`.
 
-**Quote line:** `provision_quote_line_extensions.py` syncs product **Compatible finishers / POD** text from `../../artifacts/zoho/product_extensions/extensions_by_product_code.json` (`make zoho-quote-line-extensions`). **`provision_quoted_line_dependencies.py`** adds **Machine SKU**, **Model / speed**, renames line picklists to **Configuration 1/2**, and sets **map dependency** so options follow the chosen SKU (`make zoho-quoted-line-deps`; see `../../docs/zoho/QUOTE-LINE-EXTENSIONS.md`). **`provision_quoted_line_product_first_layout.py`** (`make zoho-quote-line-product-first-layout`) renames **Machine SKU** to **Product (Machine)**, moves **Product Name** off the used layout when Zoho allows (otherwise sets **Product Name** read-only on the layout), and re-syncs picklist options to the layout (required for `map_dependency`). Re-paste Deluge from `../../artifacts/zoho/deluge/quoted_items_sync_machine_sku.deluge` into the custom function after that.
+**Quote line:** `provision_quote_line_extensions.py` syncs product **Compatible finishers / POD** text from `../../artifacts/zoho/product_extensions/extensions_by_product_code.json` (`make zoho-quote-line-extensions`). **`provision_quoted_line_dependencies.py`** adds **Machine SKU**, **Model / speed**, renames line picklists to **Configuration 1/2**, and sets **map dependency** so options follow the chosen SKU (`make zoho-quoted-line-deps`; see `../../docs/zoho/QUOTE-LINE-EXTENSIONS.md`). **`provision_quoted_line_product_first_layout.py`** (`make zoho-quote-line-product-first-layout`) renames **Machine SKU** to **Product (Machine)**, moves **Product Name** off the used layout when Zoho allows (otherwise sets **Product Name** read-only on the layout), and re-syncs picklist options to the layout (required for `map_dependency`). Re-paste Deluge from `../../artifacts/zoho/deluge/quoted_items_sync_machine_sku.deluge` into **Quote lines — sync Machine SKU** after that: that file also rebuilds each line **Description** (no second Zoho function required). Optional: `provision_quote_line_description_workflow.py` / `../../artifacts/zoho/deluge/quoted_items_build_line_description.deluge` if you use a **separate** function for descriptions.
 
 **Quote header — Reference (system field `Subject`):** `provision_quote_reference_field.py` (`make zoho-quote-reference-field`) renames the label to **Reference**. `provision_quote_client_script.py` (`make zoho-quote-client-script` or `make zoho-quote-reference-full`) tries to **GET/PUT** the script from `../../artifacts/zoho/client_scripts/quote_reference_autofill.js` via `GET /settings/client_scripts/Quotes`; that endpoint often needs **`ZohoCRM.settings.client_scripts.ALL`** in addition to `settings` scopes (see `.env.example`). Re-ordering the field in the form is **UI-only**; the Layouts API cannot move system-mandatory **Subject** out of a section.
 

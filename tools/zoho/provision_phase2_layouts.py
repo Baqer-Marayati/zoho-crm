@@ -47,7 +47,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DEALS_MODULE = "Deals"
 STAGE_API = "Stage"
 CLOSING_API = "Closing_Date"
+# Phase 2 script creates "Lost_Reason"; some orgs use Zoho's "Reason For Loss" instead.
 LOST_API = "Lost_Reason"
+LOST_API_FALLBACKS: tuple[str, ...] = ("Reason_For_Loss__s",)
 COMP_API = "Competitor"
 
 
@@ -84,6 +86,13 @@ def _fields_by_api_name(module: str, fields_payload: dict) -> dict[str, dict]:
         if api:
             out[str(api)] = f
     return out
+
+
+def _resolve_lost_field(by_api: dict[str, dict]) -> dict | None:
+    for key in (LOST_API, *LOST_API_FALLBACKS):
+        if key in by_api:
+            return by_api[key]
+    return None
 
 
 def _is_system_none(opt: dict) -> bool:
@@ -132,6 +141,8 @@ def _build_map_dependency_body(
 ) -> dict[str, Any]:
     pick_list_values: list[dict[str, Any]] = []
     for popt in stage_field.get("pick_list_values") or []:
+        if str(popt.get("type") or "").lower() == "unused":
+            continue
         pid = popt.get("id")
         if not pid:
             continue
@@ -408,19 +419,53 @@ def main() -> int:
     layout_id = _pick_standard_layout_id(r_layouts.json())
     print(f"Deals Standard layout_id={layout_id}")
 
-    r_fields = _crm(session, api_domain, "GET", "/settings/fields", params={"module": DEALS_MODULE})
+    r_fields = _crm(
+        session,
+        api_domain,
+        "GET",
+        "/settings/fields",
+        params={"module": DEALS_MODULE, "per_page": 200},
+    )
     if not r_fields.ok:
         print(f"Fields API HTTP {r_fields.status_code}: {r_fields.text[:1500]}", file=sys.stderr)
         return 1
+    fr = r_fields.json()
+    by_api = _fields_by_api_name(DEALS_MODULE, fr)
+    page = 1
+    while (fr.get("info") or {}).get("more_records"):
+        page += 1
+        r2 = _crm(
+            session,
+            api_domain,
+            "GET",
+            "/settings/fields",
+            params={"module": DEALS_MODULE, "per_page": 200, "page": page},
+        )
+        if not r2.ok:
+            break
+        fr = r2.json()
+        for f in fr.get("fields") or []:
+            api = f.get("api_name")
+            if api:
+                by_api[str(api)] = f
 
-    by_api = _fields_by_api_name(DEALS_MODULE, r_fields.json())
-    for key in (STAGE_API, CLOSING_API, LOST_API, COMP_API):
+    for key in (STAGE_API, CLOSING_API, COMP_API):
         if key not in by_api:
-            print(f"Missing Deals field api_name={key}. Run provision_phase2_fields.py first.", file=sys.stderr)
+            print(
+                f"Missing Deals field api_name={key}. Run provision_phase2_fields.py first.",
+                file=sys.stderr,
+            )
             return 1
 
+    lost_f = _resolve_lost_field(by_api)
+    if not lost_f:
+        print(
+            "Missing a Lost/closed-lost reason field (Lost_Reason or Reason_For_Loss__s).",
+            file=sys.stderr,
+        )
+        return 1
+
     stage_f = by_api[STAGE_API]
-    lost_f = by_api[LOST_API]
     comp_f = by_api[COMP_API]
     closing_id = str(by_api[CLOSING_API]["id"])
 
@@ -431,7 +476,7 @@ def main() -> int:
                 session,
                 api_domain,
                 layout_id,
-                [str(by_api[LOST_API]["id"]), str(by_api[COMP_API]["id"])],
+                [str(lost_f["id"]), str(by_api[COMP_API]["id"])],
                 args.dry_run,
             )
             and ok

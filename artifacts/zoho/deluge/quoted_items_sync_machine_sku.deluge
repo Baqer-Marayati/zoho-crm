@@ -1,13 +1,9 @@
 void automation.quoted_items_sync_machine_sku(string quoteId)
 {
 	/*
-	 * Quote subform: keep **Product Name** (lookup) aligned with the line **Machine_SKU** picklist
-	 * (label: "Product (Machine)").
-	 *
-	 * Primary path (reps): pick the Product (Machine) value "<Product_Code> - <Product_Name>".
-	 *    -> Search Products by Product_Code -> set **Product_Name** on the line (lookup).
-	 * Legacy / imports: **Product Name** is set but picklist is empty
-	 *    -> backfill **Machine_SKU** from the Product.
+	 * Quote subform:
+	 * 1) Keep **Product Name** (lookup) aligned with **Machine_SKU** (Product (Machine)).
+	 * 2) Build each line **Description** from Product + Model / speed + Configuration 1 + 2.
 	 * `opt.trigger = list()` prevents workflow loops.
 	 */
 	qid = quoteId.toLong();
@@ -16,10 +12,6 @@ void automation.quoted_items_sync_machine_sku(string quoteId)
 	{
 		return;
 	}
-	/*
-	 * Keep Valid Until deterministic: always 14 days from Created Time.
-	 * This runs on create/edit and only writes when the date is different.
-	 */
 	createdRaw = quote.get("Created_Time");
 	targetValid = "";
 	if(createdRaw != null)
@@ -44,6 +36,7 @@ void automation.quoted_items_sync_machine_sku(string quoteId)
 	items = quote.get("Quoted_Items");
 	newItems = list();
 	itemsChanged = false;
+	nl = "\n";
 	if(items != null && items.size() > 0)
 	{
 		for each item in items
@@ -120,6 +113,161 @@ void automation.quoted_items_sync_machine_sku(string quoteId)
 						}
 					}
 				}
+			}
+			productName = "";
+			productDesc = "";
+			productId = "";
+			productCode = "";
+			pRow = keep.get("Product_Name");
+			if(pRow != null)
+			{
+				pid0 = pRow.get("id");
+				if(pid0 != null)
+				{
+					productId = pid0.toString();
+				}
+				pn0 = pRow.get("name");
+				if(pn0 != null)
+				{
+					productName = pn0.toString().trim();
+				}
+			}
+			if(productId != "")
+			{
+				prp = zoho.crm.getRecordById("Products", productId.toLong());
+				if(prp != null)
+				{
+					pn1 = prp.get("Product_Name");
+					if(productName == "" && pn1 != null)
+					{
+						productName = pn1.toString().trim();
+					}
+					pc1 = prp.get("Product_Code");
+					if(pc1 != null)
+					{
+						productCode = pc1.toString().trim();
+					}
+					pd1 = prp.get("Description");
+					if(pd1 != null)
+					{
+						productDesc = pd1.toString().trim();
+					}
+				}
+			}
+			msv = keep.get("Machine_SKU");
+			if((productName == "" || productDesc == "") && msv != null && msv.toString().trim() != "")
+			{
+				rawm = msv.toString().trim();
+				posm = rawm.indexOf(" - ");
+				if(posm > 0)
+				{
+					productCode = rawm.substring(0,posm).trim();
+					if(productName == "" && rawm.length() > posm + 3)
+					{
+						productName = rawm.substring(posm + 3,rawm.length()).trim();
+					}
+				}
+				else
+				{
+					productCode = rawm;
+				}
+				if(productDesc == "" && productCode != "")
+				{
+					crit2 = "(Product_Code:equals:" + productCode + ")";
+					sr2 = zoho.crm.searchRecords("Products", crit2);
+					if(sr2 != null && sr2.size() > 0)
+					{
+						pr3 = sr2.get(0);
+						if(productName == "")
+						{
+							pn2b = pr3.get("Product_Name");
+							if(pn2b != null)
+							{
+								productName = pn2b.toString().trim();
+							}
+						}
+						pd2b = pr3.get("Description");
+						if(pd2b != null)
+						{
+							productDesc = pd2b.toString().trim();
+						}
+					}
+				}
+			}
+			summary = "";
+			if(productName != "")
+			{
+				summary = productName;
+			}
+			if(productDesc != "")
+			{
+				if(summary != "")
+				{
+					summary = summary + nl;
+				}
+				summary = summary + productDesc;
+			}
+			configText = "";
+			modelRaw = keep.get("Model_speed");
+			model = "";
+			if(modelRaw != null)
+			{
+				model = modelRaw.toString().trim();
+			}
+			if(model != "" && model != "- None -" && model != "- Not applicable -")
+			{
+				configText = "Selected model / speed: " + model;
+			}
+			c1Raw = keep.get("Finisher_line");
+			c1 = "";
+			if(c1Raw != null)
+			{
+				c1 = c1Raw.toString().trim();
+			}
+			if(c1 != "" && c1 != "- None -" && c1 != "- Not applicable -")
+			{
+				if(configText != "")
+				{
+					configText = configText + nl;
+				}
+				configText = configText + "Configuration 1: " + c1;
+			}
+			c2Raw = keep.get("POD_paper_module_line");
+			c2 = "";
+			if(c2Raw != null)
+			{
+				c2 = c2Raw.toString().trim();
+			}
+			if(c2 != "" && c2 != "- None -" && c2 != "- Not applicable -")
+			{
+				if(configText != "")
+				{
+					configText = configText + nl;
+				}
+				configText = configText + "Configuration 2: " + c2;
+			}
+			if(configText != "")
+			{
+				if(summary != "")
+				{
+					summary = summary + nl + nl;
+				}
+				summary = summary + configText;
+			}
+			if(summary.length() > 32000)
+			{
+				summary = summary.substring(0,32000);
+			}
+			curr = keep.get("Description");
+			currText = "";
+			if(curr != null)
+			{
+				currText = curr.toString();
+			}
+			if(currText != summary)
+			{
+				keep.put("Description", summary);
+				itemsChanged = true;
 			}
 			newItems.add(keep);
 		}

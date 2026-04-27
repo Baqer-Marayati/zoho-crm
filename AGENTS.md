@@ -7,6 +7,7 @@ This repository automates and documents a **Zoho CRM Professional** rollout plus
 - **Build order:** `docs/zoho/IMPLEMENTATION-CHECKLIST.md` — do not improvise phase order.
 - **Developer setup:** `docs/zoho/DEVELOPER.md`, `docs/zoho/GETTING-STARTED.md`; scripts live in `tools/zoho/`; secrets only in `tools/zoho/.env` (gitignored).
 - **Automation index:** `tools/zoho/README.md` and `make help` from the repo root.
+- **Efficient Zoho context:** before broad Zoho metadata work, prefer the compact cache summary at `.cache/zoho/metadata.summary.md`. If it is missing/stale, run `make zoho-cache-summary` (auto-refresh) or `make zoho-cache-refresh` after metadata changes. This reduces Zoho API credits and AI context usage; cache files are local/gitignored and contain metadata only.
 - **Workshop context (archive):** `docs/zoho/archive/configuration-rounds/`.
 - **Cursor rule:** `.cursor/rules/zoho-crm-api-automation.mdc` — run scripts in-terminal when the task is clearly Zoho API work; confirm before bulk-destructive or org-wide security changes.
 

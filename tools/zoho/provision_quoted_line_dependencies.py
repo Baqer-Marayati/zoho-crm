@@ -41,7 +41,11 @@ OLD_FINISHERS = "Finisher (line)"
 OLD_POD = "POD / paper module (line)"
 LABEL_C1 = "Configuration 1"
 LABEL_C2 = "Configuration 2"
+# UI label is often "Product (Machine)"; api_name is **Machine_SKU**. Do not resolve by the literal
+# label "Machine SKU" after a duplicate field (api Machine_SKU1) was accidentally created in some orgs.
 LABEL_SKU = "Machine SKU"
+LABEL_SKU_PREFERRED = "Product (Machine)"
+API_MACHINE_SKU = "Machine_SKU"
 LABEL_MS = "Model / speed"
 # Zoho line-item picklist: avoid em dash and some punctuation (API returns INVALID_DATA).
 NONE_OPT = "- None -"
@@ -84,6 +88,25 @@ MODEL_SPEED: dict[str, list[str]] = {
         "V700 (70 ppm) — confirm on quote",
         "V800 (80 ppm) — confirm on quote",
         "V900 (90 ppm) — confirm on quote",
+    ],
+    # Five-machine consolidated catalog (extensions_by_product_code.json) — was missing, so
+    # map_dependency fell back to "- Not applicable -" for Model / speed and looked like "None".
+    "CANON-VP6K-TITAN": [
+        "6180 ppm (varioPRINT 6000 TITAN) — confirm on quote",
+        "6220 ppm (varioPRINT 6000 TITAN) — confirm on quote",
+        "6270 ppm (varioPRINT 6000 TITAN) — confirm on quote",
+        "6330 ppm (varioPRINT 6000 TITAN) — confirm on quote",
+    ],
+    "CANON-IP-V1000": [
+        "100 ppm (imagePRESS V1000) — confirm on quote",
+    ],
+    "CANON-IP-V1350": [
+        "135 ppm (imagePRESS V1350) — confirm on quote",
+    ],
+    "CANON-VP140-SER": [
+        "varioPRINT 115 (117 ppm) — confirm on quote",
+        "varioPRINT 130 (133 ppm) — confirm on quote",
+        "varioPRINT 140 (143 ppm) — confirm on quote",
     ],
     "CANON-IRDX-4900-SER": [
         "6860i (86 ppm) — confirm on quote",
@@ -164,6 +187,39 @@ def _fields_map(session: requests.Session, api_domain: str, module: str) -> dict
         for f in r.json().get("fields", [])
         if f.get("field_label")
     }
+
+
+def _field_by_api_name(
+    session: requests.Session, api_domain: str, module: str, api_name: str
+) -> dict | None:
+    """Return the field dict for api_name (e.g. Machine_SKU, not Machine_SKU1)."""
+    r = _crm(
+        session,
+        api_domain,
+        "GET",
+        "/settings/fields",
+        params={"module": module, "type": "all"},
+    )
+    if not r.ok:
+        return None
+    for f in r.json().get("fields", []) or []:
+        if (f.get("api_name") or "") == api_name:
+            return f
+    return None
+
+
+def _field_machine_sku_parent(
+    session: requests.Session, api_domain: str, module: str, fm: dict[str, dict]
+) -> dict | None:
+    """The picklist that drives map_dependency; must be api_name Machine_SKU."""
+    f = _field_by_api_name(session, api_domain, module, API_MACHINE_SKU)
+    if f:
+        return f
+    return (
+        fm.get((LABEL_SKU_PREFERRED or "").lower())
+        or fm.get("product (machine)")
+        or None
+    )
 
 
 def _default_layout_id(session: requests.Session, api_domain: str, module: str) -> str | None:
@@ -492,8 +548,13 @@ def main() -> int:
         _patch_field_label(s, dom, mod, str(f2["id"]), LABEL_C2, args.dry_run)
 
     sku_vals = [NONE_OPT] + [per[k]["sku_disp"] for k in sorted(per.keys(), key=str.casefold)]
-    if not _post_picklist(s, dom, mod, LABEL_SKU, sku_vals, args.dry_run):
-        return 1
+    if not _field_by_api_name(s, dom, mod, API_MACHINE_SKU):
+        if not _post_picklist(s, dom, mod, LABEL_SKU_PREFERRED, sku_vals, args.dry_run):
+            return 1
+    else:
+        print(
+            f"  Quoted_Items field {API_MACHINE_SKU} already exists; will merge options (not create Field)."
+        )
     if not _post_picklist(s, dom, mod, LABEL_MS, all_m, args.dry_run):
         return 1
 
@@ -509,7 +570,7 @@ def main() -> int:
     fm2 = _refresh_fields(s, dom, mod)
     c1f = fm2.get(LABEL_C1.lower())
     c2f = fm2.get(LABEL_C2.lower())
-    fsku = fm2.get(LABEL_SKU.lower())
+    fsku = _field_machine_sku_parent(s, dom, mod, fm2)
     fms = fm2.get(LABEL_MS.lower())
     if not c1f or not c2f or not fsku or not fms:
         print("Could not find required line fields after create.", file=sys.stderr)
@@ -528,7 +589,7 @@ def main() -> int:
     fm3 = _refresh_fields(s, dom, mod)
     c1f = fm3[LABEL_C1.lower()]
     c2f = fm3[LABEL_C2.lower()]
-    fsku = fm3[LABEL_SKU.lower()]
+    fsku = _field_machine_sku_parent(s, dom, mod, fm3)
     fms = fm3[LABEL_MS.lower()]
 
     p_sku = {p["display_value"]: p for p in (fsku.get("pick_list_values") or [])}
