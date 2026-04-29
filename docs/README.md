@@ -16,6 +16,8 @@ If you are working on Zoho CRM implementation, start with [`zoho/INDEX.md`](./zo
 | [zoho/LEADS-AND-DEALS.md](./zoho/LEADS-AND-DEALS.md) | **Leads → conversion → Deals** (roles, mapping, lost reasons) |
 | [zoho/PRODUCTS-AND-QUOTES.md](./zoho/PRODUCTS-AND-QUOTES.md) | **IQD**, catalog cleanup, quotes, attachments (no approval v1) |
 | [zoho/AUTOMATION-STACK.md](./zoho/AUTOMATION-STACK.md) | OAuth, MCP, what stays in Zoho UI vs scripts |
+| [zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md](./zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md) | Deals + Quotes workflows + Deluge (`make zoho-deals-quotes-process`) |
+| [zoho/handoffs/README.md](./zoho/handoffs/README.md) | Agent handoffs — long prompts & business/tech specs |
 | [zoho/QUOTE-LINE-EXTENSIONS.md](./zoho/QUOTE-LINE-EXTENSIONS.md) | Quoted line fields, finisher/POD, machine SKU layout |
 | [zoho/QUOTE-LINE-AUTOMATION.md](./zoho/QUOTE-LINE-AUTOMATION.md) | Deluge, workflows for quoted line automation |
 | [zoho/archive/configuration-rounds/](./zoho/archive/configuration-rounds/) | **Workshop capture** — Rounds 3–8: tax, M365, sales scope, discounts, dups, pilot, activities |

@@ -1,6 +1,6 @@
 # Project status
 
-**As of 2026-04-26** — *Update when direction or scope changes.*
+**As of 2026-04-29** — *Update when direction or scope changes.*
 
 | Item | State |
 |------|--------|
@@ -18,7 +18,7 @@
 
 - Zoho **edition** and add-ons (e.g. Sign)
 - Power BI: **Pro vs Premium/Fabric** for viewers — one answer from IT
-- Balance: **Zoho admin UI** vs **API scripts in `tools/zoho`**
+- Optional **Blueprint** process graph on Deals (**Setup → Process Management → Blueprint**) — not required while **workflows + `deal_stage_gate_guard` Deluge** cover stage gates (`docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md`)
 
 ## Next steps
 
@@ -28,5 +28,5 @@
 2. ~~**Unified Deals pipeline**~~ **Done (2026-04-23)** — single **Standard (Standard)** pipeline; sector via **Line of business** (Production \| MPS \| Radiology) on Lead + Deal; `pipelines_seed.json` + `provision_pipelines.py --sync`; legacy **Production** / **MPS** pipelines retired via Zoho **transfer-and-delete** API where applicable.  
 3. ~~**Phase 2 Leads & Deals** fields + layouts~~ **Done (2026-04-23)** — picklists (`provision_phase2_fields.py`), Closing Date + map dependencies (`provision_phase2_layouts.py`), field history tracking (`provision_phase2_tracking.py`). **Lead → Deal conversion mapping** checked via API (`audit_lead_conversion_mapping.py`): **Line of business** copies to Deal; optional: map **Company** → **Potential Name** if you want that automated. Remaining optional UI: **stage–probability** per pipeline (~2 min, Setup → Pipelines).  
 4. ~~**Phase 3 Products & Quotes** (price book + fields)~~ **Done (2026-04-23)** — `provision_phase3.py`: IQD price book, Payment Terms picklist on Quotes, Contract Folder URL on Deals + Quotes. **Pending**: Wave A CSV needs real SKUs → then `provision_phase3.py --step 2` (or `make zoho-phase3-products`).  
-5. **Next (before users):** **Phase 3** Wave A product import (real SKUs), **Phase 4** lead import — see **[IMPLEMENTATION-CHECKLIST.md](./zoho/IMPLEMENTATION-CHECKLIST.md)**. **Phase 2** configuration + conversion mapping are done/verified via API. **Phase 1** (MFA, M365, dup rules, territories, roles, IQD company settings) runs **last**, immediately **before** purchasing licenses and assigning users; then **Phase 5** pilot.  
+5. **Next (before users):** **Phase 3** Wave A product import (real SKUs in CSV → `provision_phase3.py --step 2` or `make zoho-phase3-products`), **Phase 4** lead import — see **[IMPLEMENTATION-CHECKLIST.md](./zoho/IMPLEMENTATION-CHECKLIST.md)**. ~~**Deals + Quotes sales process**~~ **Done (2026-04-29)** — workflows + Deluge via **`make zoho-deals-quotes-process`** — [`DEALS-QUOTES-PROCESS-PROVISIONING.md`](./zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md). **Phase 1** (MFA, M365, dup rules, territories, roles, IQD company settings) runs **last**, immediately **before** purchasing licenses and assigning users; then **Phase 5** pilot.  
 6. **Power BI:** later — [`POWER-BI-AND-LICENSING.md`](./zoho/POWER-BI-AND-LICENSING.md).

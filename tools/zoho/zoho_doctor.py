@@ -100,18 +100,29 @@ def run_checks(verbose: bool) -> Report:
         )
     )
 
-    # 3) Automation functions
+    # 3) Custom functions — Developer Hub catalog + workflow wrappers
     resp = _get(session, dom, "/settings/automation/functions", per_page=200, page=1)
-    n_fn = 0
+    n_wrap = 0
     if resp.ok:
         jf = _json(resp) or {}
-        n_fn = len(jf.get("functions") or [])
+        n_wrap = len(jf.get("functions") or [])
+    resp_cat = _get(session, dom, "/settings/functions", per_page=200, page=1)
+    n_cat = 0
+    if resp_cat.ok:
+        jc = _json(resp_cat) or {}
+        n_cat = len(jc.get("functions") or [])
+    if resp.ok and resp_cat.ok:
+        fn_detail = f"{n_wrap} automation wrapper(s); Developer Hub catalog /settings/functions count={n_cat}"
+    elif resp.ok:
+        fn_detail = f"{n_wrap} wrapper(s); /settings/functions HTTP {resp_cat.status_code}"
+    else:
+        fn_detail = (resp.text or "")[:400]
     c.append(
         Check(
-            name=f"List custom functions (count={n_fn if resp.ok else 'n/a'})",
+            name=f"List automation function wrappers (count={n_wrap if resp.ok else 'n/a'})",
             ok=resp.ok,
             http_status=resp.status_code,
-            detail=(f"{n_fn} function(s) visible to this token" if resp.ok else (resp.text or "")[:400]),
+            detail=fn_detail,
             scope_hint="ZohoCRM.settings.automation_actions.READ or ZohoCRM.settings.ALL" if not resp.ok else "",
         )
     )

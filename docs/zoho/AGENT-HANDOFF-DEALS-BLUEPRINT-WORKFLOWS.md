@@ -1,0 +1,3 @@
+# Moved
+
+This file moved to [`handoffs/AGENT-HANDOFF-DEALS-BLUEPRINT-WORKFLOWS.md`](./handoffs/AGENT-HANDOFF-DEALS-BLUEPRINT-WORKFLOWS.md).

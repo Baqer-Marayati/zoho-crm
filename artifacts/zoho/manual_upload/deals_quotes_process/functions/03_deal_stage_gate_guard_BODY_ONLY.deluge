@@ -1,0 +1,137 @@
+did = dealId.toLong();
+deal = zoho.crm.getRecordById("Deals", did);
+if(deal == null)
+{
+	return;
+}
+stage = ifnull(deal.get("Stage"), "").toString();
+missing = list();
+discoverySummary = ifnull(deal.get("Discovery_summary"), "").toString().trim();
+currentMachines = ifnull(deal.get("Current_machines_setup"), "").toString().trim();
+applications = ifnull(deal.get("Applications"), "").toString().trim();
+budgetStatus = ifnull(deal.get("Budget_financing_status"), "").toString().trim();
+if(stage == "Solution / Value" || stage == "Quote Sent")
+{
+	if(discoverySummary == "")
+	{
+		missing.add("Discovery summary");
+	}
+	if(currentMachines == "")
+	{
+		missing.add("Current machines / setup");
+	}
+	if(applications == "")
+	{
+		missing.add("Applications");
+	}
+	if(budgetStatus == "" || budgetStatus == "-None-")
+	{
+		missing.add("Budget / financing status");
+	}
+}
+if(stage == "Quote Sent")
+{
+	amount = deal.get("Amount");
+	if(amount == null || amount.toString().trim() == "")
+	{
+		missing.add("Amount");
+	}
+	if(deal.get("Primary_Quote") == null)
+	{
+		missing.add("Primary Quote");
+	}
+	linkedQuotes = zoho.crm.getRelatedRecords("Quotes", "Deals", did);
+	if(linkedQuotes == null || linkedQuotes.size() == 0)
+	{
+		missing.add("at least one linked Quote");
+	}
+}
+if(stage == "Negotiation")
+{
+	anyShared = deal.get("Any_quote_shared_with_customer");
+	if(!(anyShared == true || anyShared == "true"))
+	{
+		missing.add("at least one linked Quote marked Quote shared with customer");
+	}
+}
+if(stage == "Closed Won")
+{
+	wonNotes = ifnull(deal.get("Won_handoff_notes"), "").toString().trim();
+	if(wonNotes == "")
+	{
+		missing.add("Won / handoff notes");
+	}
+}
+if(stage == "Closed Lost")
+{
+	lostReason = ifnull(deal.get("Lost_Reason"), "").toString().trim();
+	if(lostReason == "" || lostReason == "-None-")
+	{
+		missing.add("Lost Reason");
+	}
+	compRequired = false;
+	if(lostReason == "Competitor" || lostReason == "Lost to competitor / bought elsewhere" || lostReason == "Price")
+	{
+		compRequired = true;
+	}
+	competitor = ifnull(deal.get("Competitor"), "").toString().trim();
+	if(compRequired && (competitor == "" || competitor == "-None-"))
+	{
+		missing.add("Competitor");
+	}
+	nextTryRequired = false;
+	if(lostReason == "Timing" || lostReason == "Timing / not now" || lostReason == "Budget" || lostReason == "No budget / no approval" || lostReason == "No decision" || lostReason == "Project paused" || lostReason == "Tender lost but future opportunities")
+	{
+		nextTryRequired = true;
+	}
+	if(nextTryRequired && deal.get("Next_try_follow_up_date") == null)
+	{
+		missing.add("Next try / follow-up date");
+	}
+}
+if(missing.size() == 0)
+{
+	return;
+}
+message = "Stage gate failed for " + stage + ". Missing: " + missing.toString();
+fallback = "";
+if(stage == "Solution / Value")
+{
+	fallback = "Needs Analysis";
+}
+else if(stage == "Quote Sent")
+{
+	fallback = "Solution / Value";
+}
+else if(stage == "Negotiation")
+{
+	fallback = "Quote Sent";
+}
+else if(stage == "Closed Won")
+{
+	fallback = "Negotiation";
+}
+if(fallback != "")
+{
+	upd = Map();
+	upd.put("Stage", fallback);
+	opt = Map();
+	opt.put("trigger", list());
+	resp = zoho.crm.updateRecord("Deals", did, upd, opt);
+	message = message + ". Stage was moved back to " + fallback + ".";
+}
+taskMap = Map();
+taskMap.put("Subject", "Fix Deal stage gate: " + stage);
+taskMap.put("Due_Date", zoho.currentdate.toString("yyyy-MM-dd"));
+taskMap.put("Status", "Not Started");
+taskMap.put("Priority", "High");
+taskMap.put("Description", message);
+owner = deal.get("Owner");
+if(owner != null && owner.get("id") != null)
+{
+	taskMap.put("Owner", owner.get("id"));
+}
+taskMap.put("$se_module", "Deals");
+taskMap.put("What_Id", did);
+taskResp = zoho.crm.createRecord("Tasks", taskMap);
+return;

@@ -11,7 +11,8 @@ This repository holds **docs and automation** for a **Zoho CRM Professional** sa
 | `docs/zoho/REPO-LAYOUT.md` | **Folder map** (docs, tools, artifacts) |
 | `docs/zoho/IMPLEMENTATION-CHECKLIST.md` | **Phased go-live** — start here after workshops |
 | `docs/PROJECT-STATUS.md` | Current scope and next steps — update as you go |
-| `docs/zoho/QUOTE-TEMPLATE-LEARNINGS.md` | **Quote PDF** (Aljazeera Quotation) — design + provisioning |
+| `docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md` | **Deals + Quotes** workflows + Deluge — `make zoho-deals-quotes-process` |
+| `docs/zoho/handoffs/` | **Agent handoffs** — Cursor prompts and extended business/tech specs |
 | `docs/zoho/archive/` | Workshop **configuration rounds** (3–8) and other **historical** notes |
 | `tools/zoho/` | Python **API** helpers — OAuth, pipelines, product sync, one-off tools |
 | `tools/zoho/archive/` | Legacy or alternate **JSON** seeds (e.g. old pipeline layout) |

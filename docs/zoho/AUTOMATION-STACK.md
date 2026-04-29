@@ -35,6 +35,7 @@ Zoho hosts the MCP servers; you wire **Cursor** to the endpoint Zoho gives you. 
 - [Zoho MCP](https://www.zoho.com/mcp/) — product overview and signup.
 - [Zoho MCP console](https://mcp.zoho.com/) — create servers and copy the client URL.
 - [Zoho CRM MCP — overview](https://www.zoho.com/crm/developer/docs/mcp/overview.html) — CRM tool bundles (data insights, CRUD, customization, workflows).
+- [Zoho CRM API v8](https://www.zoho.com/crm/developer/docs/api/v8/) — REST baseline behind both MCP and `tools/zoho`.
 
 **Cursor setup (recommended path)**
 
@@ -53,6 +54,26 @@ Zoho hosts the MCP servers; you wire **Cursor** to the endpoint Zoho gives you. 
 
 **Regenerating the URL:** In Zoho MCP, **Regenerate API Key** invalidates the old URL — update `mcp.json` everywhere you pasted it.
 
+### 2.1 MCP tool bundles (typical Cursor install)
+
+In Cursor, hosted Zoho CRM MCP often appears as **several server identifiers** (names vary by how you added tools). Descriptor JSON lives under your Cursor project’s `mcps/` folder. A typical split:
+
+| Server (example id) | What it maps to (v8-ish) | Representative tools |
+|---------------------|--------------------------|----------------------|
+| **zoho-crm-module-customisation** | Settings: modules, fields, layouts | `getModules`, `getFields`, `createFields`, `updateField`, `getLayouts`, `updateLayout`, … |
+| **zoho-crm-automation** | Workflows, tasks, field updates, webhooks | `getWorkflowRules`, `postWorkflowRule`, `updateWorkflowRule`, `getWorkflowConfigurations`, `createWorkflowTasks`, `createFieldUpdates`, … |
+| **zoho-crm-data-operations** | Module record CRUD | `getRecords`, `createRecords`, `updateRecords`, `deleteRecords`, related records |
+| **zoho-crm-data-insights** | Read/analytics | `executeCOQLQuery`, `getModules`, `getFields` |
+
+You may also see older or duplicate aliases (**user-CRM-Data-Metadata**, **user-CRM-Automation-Workflow**, **user-Lead-Management**) with overlapping tools — prefer the **zoho-crm-**\* bundles when both exist so schemas stay aligned with current Zoho CRM MCP.
+
+**Gaps (still use `tools/zoho` Python today):**
+
+- **Custom functions:** MCP does not replace the CRM REST function catalog and source endpoints. Use `GET /crm/v8/settings/functions`, `GET /crm/v8/settings/functions/{api_name}/code`, multipart `POST`/`PUT /crm/v8/settings/functions` with a `.ds` code file, and `POST /crm/v8/settings/automation/functions` for workflow wrapper rows. Repo: `provision_deals_quotes_process.py`, `provision_quoted_line_machine_sku_workflow.py`, `zoho_doctor.py`.
+- **Blueprint *definitions***, **some validation-rule writes**, and other settings not exposed in v8 docs — still product limits.
+
+**Agent discipline:** Read each tool’s JSON descriptor (parameters and constraints) before calling; workflow `post`/`update` payloads are strict (criteria shape, action ids, `GET /workflow_configurations` first when the tool says so).
+
 ## 3. Community MCP servers (optional, self-hosted)
 
 Third-party MCP servers can expose Zoho CRM to **Cursor**, Claude Desktop, etc. They still need OAuth client + refresh token (same ideas as `tools/zoho`). Examples to evaluate (not endorsed; check code and trust before use):
@@ -66,9 +87,10 @@ If you add one, keep **client secret and refresh token** out of the repo; use en
 These are product limits, not gaps in this repo:
 
 | Item | Reality |
-|------|--------|
-| **POST custom function (raw Deluge)** | Often returns `INVALID_DATA` for `arguments.function`. First-time create in Zoho **Functions** UI is common; the repo still stores Deluge in `artifacts/zoho/deluge/` and scripts attach **workflows** by ID. |
-| **List functions returns `[]` but UI shows a function** | Possible org/API quirks, or the function is under a name your token cannot list. Use the function’s **ID from the URL** and `--function-id=…` on the provisioner. |
+|------|---------|
+| **OAuth / trust** | First-time **Zoho API Console** client + **refresh token** (and MCP browser **Connect**) still require a human in the loop. After that, agents and scripts run without repeated login. |
+| **Custom function source** | Raw Deluge `POST /settings/automation/functions` can return `INVALID_DATA` for `arguments.function`. Prefer **`/settings/functions`** for source: `GET /settings/functions/{api_name}/code` reads Deluge, and multipart `POST`/`PUT /settings/functions` with JSON `metadata` plus a `.ds` `code` file creates/updates catalog functions. Workflow **instant actions** still need wrapper ids from **`GET /crm/v8/settings/automation/functions`** or a thin **`POST /settings/automation/functions`** with `function: {id: <catalog_id>}`. |
+| **Blueprint process graphs**, **some validation rules** | The UI location is **Setup → Process Management → Blueprint**. v8/v9 APIs and MCP metadata currently expose Blueprint support and record-level transition execution (`/{module}/{record_id}/actions/blueprint`), not settings-side Blueprint definition create/update. Design fallbacks with workflows + Deluge until Zoho exposes a definition endpoint. |
 | **Some org settings** | Teamspace, certain UI-only toggles, or API preview features may need a one-time UI action. The repo documents those in the relevant `docs/zoho/*.md` file. |
 
 ## 5. Operating discipline

@@ -18,6 +18,11 @@ Use this page as the **single navigation entrypoint** for Zoho CRM work in this 
 - **Quote PDF template (learnings):** [`QUOTE-TEMPLATE-LEARNINGS.md`](./QUOTE-TEMPLATE-LEARNINGS.md)
 - **Phase 2 automation details:** [`PHASE2-AUTOMATED.md`](./PHASE2-AUTOMATED.md)
 
+## Deals + Quotes — sales process (workflows + Deluge)
+
+- **What is provisioned + API gaps:** [`DEALS-QUOTES-PROCESS-PROVISIONING.md`](./DEALS-QUOTES-PROCESS-PROVISIONING.md) — re-run via `make zoho-deals-quotes-process`.
+- **Agent handoffs / long prompts:** [`handoffs/README.md`](./handoffs/README.md) (business spec + end-to-end agent checklist).
+
 ## Automation and platform
 
 - **Automation stack (API + MCP + UI split):** [`AUTOMATION-STACK.md`](./AUTOMATION-STACK.md)

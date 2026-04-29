@@ -104,6 +104,14 @@ Edit `pipelines_seed.json` so stage names match your org’s **Deals → Stage**
 
 **Canon PDFs on Products:** `upload_canon_product_pdfs.py` posts `*.pdf` from `~/Dropbox/Work/Canon/Canon machine specs for SAP` subfolders to the matching product’s **Attachments** (`make zoho-upload-canon-product-pdfs`). Needs attachment create scope; re-run may duplicate files if Zoho allows.
 
+### Deals + Quotes — sales process (workflows + Deluge)
+
+Idempotent rollout: **`provision_deals_quotes_process.py`** (`make zoho-deals-quotes-process`, `--dry-run` first). Creates/updates Deals + Quotes fields and layouts, reusable workflow tasks, workflow rules (including three **function-backed** rules), and syncs Developer Hub Deluge from `../../artifacts/zoho/deluge/*.deluge`.
+
+- **Provisioning doc + API gaps:** [`../../docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md`](../../docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md)
+- **Agent handoffs (long prompts):** [`../../docs/zoho/handoffs/README.md`](../../docs/zoho/handoffs/README.md)
+- **Manual upload escape hatch:** [`../../artifacts/zoho/manual_upload/deals_quotes_process/README.md`](../../artifacts/zoho/manual_upload/deals_quotes_process/README.md) (only if API is blocked after documented failures)
+
 ### Phase 2 fields (Line of business, Lost Reason, Competitor)
 
 Requires **`ZohoCRM.settings.ALL`** (or `settings.fields.CREATE`) on your refresh token.
@@ -147,4 +155,4 @@ chmod 600 .env
 - `../../docs/zoho/DEVELOPER.md` — repo workflow
 - `../../docs/zoho/GETTING-STARTED.md` — Zoho API Console and scopes
 
-Zoho’s official **CRM API v2** docs: use the current URL for your data center (`.com` / `.eu` / etc.) from [Zoho’s developer site](https://www.zoho.com/crm/developer/docs/api/v2/).
+Zoho CRM **REST APIs** (`/crm/v8/…`, `/crm/v9/…`): use the URLs for **your org’s data center** from [Zoho’s developer docs](https://www.zoho.com/crm/developer/docs/api/v8/) (CRM v8/v9 supersede older v2 snippets you may still see in dated posts).

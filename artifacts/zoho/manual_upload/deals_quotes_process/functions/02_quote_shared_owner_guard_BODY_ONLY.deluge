@@ -1,0 +1,46 @@
+qid = quoteId.toLong();
+quote = zoho.crm.getRecordById("Quotes", qid);
+if(quote == null)
+{
+	return;
+}
+shared = quote.get("Quote_shared_with_customer");
+if(!(shared == true || shared == "true"))
+{
+	return;
+}
+owner = quote.get("Owner");
+modifiedBy = quote.get("Modified_By");
+ownerId = "";
+modifiedById = "";
+if(owner != null && owner.get("id") != null)
+{
+	ownerId = owner.get("id").toString();
+}
+if(modifiedBy != null && modifiedBy.get("id") != null)
+{
+	modifiedById = modifiedBy.get("id").toString();
+}
+if(ownerId == "" || modifiedById == "" || ownerId == modifiedById)
+{
+	return;
+}
+upd = Map();
+upd.put("Quote_shared_with_customer", false);
+opt = Map();
+opt.put("trigger", list());
+resp = zoho.crm.updateRecord("Quotes", qid, upd, opt);
+taskMap = Map();
+taskMap.put("Subject", "Quote shared checkbox reset - owner action required");
+taskMap.put("Due_Date", zoho.currentdate.toString("yyyy-MM-dd"));
+taskMap.put("Status", "Not Started");
+taskMap.put("Priority", "High");
+taskMap.put("Description", "Only the Quote Owner may mark Quote shared with customer. Review this quote and set the checkbox if the customer received it.");
+if(ownerId != "")
+{
+	taskMap.put("Owner", ownerId);
+}
+taskMap.put("$se_module", "Quotes");
+taskMap.put("What_Id", qid);
+taskResp = zoho.crm.createRecord("Tasks", taskMap);
+return;

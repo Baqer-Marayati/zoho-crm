@@ -1,0 +1,41 @@
+{
+  "after_upload_run": "make zoho-deals-quotes-process",
+  "functions": [
+    {
+      "name": "quote_recompute_deal_shared",
+      "module": "Quotes",
+      "argument": {
+        "name": "quoteId",
+        "type": "string",
+        "map_to": "Quotes - Quote Id / ${Quotes.id}"
+      },
+      "full_signature_file": "functions/01_quote_recompute_deal_shared_FULL.deluge",
+      "body_only_file": "functions/01_quote_recompute_deal_shared_BODY_ONLY.deluge",
+      "purpose": "Recomputes Deals.Any_quote_shared_with_customer when any linked Quote is shared/unshared."
+    },
+    {
+      "name": "quote_shared_owner_guard",
+      "module": "Quotes",
+      "argument": {
+        "name": "quoteId",
+        "type": "string",
+        "map_to": "Quotes - Quote Id / ${Quotes.id}"
+      },
+      "full_signature_file": "functions/02_quote_shared_owner_guard_FULL.deluge",
+      "body_only_file": "functions/02_quote_shared_owner_guard_BODY_ONLY.deluge",
+      "purpose": "Resets Quote_shared_with_customer if a non-owner sets it, then creates a task for the Quote Owner."
+    },
+    {
+      "name": "deal_stage_gate_guard",
+      "module": "Deals",
+      "argument": {
+        "name": "dealId",
+        "type": "string",
+        "map_to": "Deals - Deal Id / ${Deals.id}"
+      },
+      "full_signature_file": "functions/03_deal_stage_gate_guard_FULL.deluge",
+      "body_only_file": "functions/03_deal_stage_gate_guard_BODY_ONLY.deluge",
+      "purpose": "Post-save stage gate enforcement for discovery, Quote Sent, Negotiation, Closed Won, and Closed Lost."
+    }
+  ]
+}

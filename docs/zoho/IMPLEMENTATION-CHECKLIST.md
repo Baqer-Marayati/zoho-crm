@@ -60,6 +60,7 @@ Phase numbers stay as labeled below; **Phase 1 is intentionally late** so securi
 5. [x] **Stage–probability mapping** — `/settings/stages` API returns probabilities (HTTP 200); default Zoho values already loaded. To set custom values: `Setup → Pipelines → Standard (Standard) → Stage-Probability` (~2 min) — [`PHASE2-AUTOMATED.md`](./PHASE2-AUTOMATED.md) §5
 6. [x] **Field history** emphasis: **Stage**, **Amount** — **`provision_phase2_tracking.py`** (`make zoho-phase2-tracking`) — Stage tracking enabled; Amount tracked as followed-field of Stage History
 7. [x] **Activity** discipline (training; blueprint optional) — documented in [`PHASE2-AUTOMATED.md`](./PHASE2-AUTOMATED.md) §7
+8. [x] **Deals + Quotes sales process** — fields, layouts, workflows, reusable tasks, Developer Hub Deluge (`quote_recompute_deal_shared`, `quote_shared_owner_guard`, `deal_stage_gate_guard`) — **`make zoho-deals-quotes-process`** — [`DEALS-QUOTES-PROCESS-PROVISIONING.md`](./DEALS-QUOTES-PROCESS-PROVISIONING.md); agent prompts in [`handoffs/`](./handoffs/)
 
 ---
 
@@ -107,6 +108,8 @@ Wave A import (step 2): use a filled CSV — **Product_Code** optional if you de
 
 | Doc | Role |
 |-----|------|
+| [DEALS-QUOTES-PROCESS-PROVISIONING.md](./DEALS-QUOTES-PROCESS-PROVISIONING.md) | Deals + Quotes workflows, Deluge functions, MCP verification notes |
+| [handoffs/](./handoffs/) | Agent handoffs — long prompts and business/workflow blueprint spec |
 | [LEADS-AND-DEALS.md](./LEADS-AND-DEALS.md) | Leads, conversion, lost reasons |
 | [PRODUCTS-AND-QUOTES.md](./PRODUCTS-AND-QUOTES.md) | IQD, catalog waves, quotes |
 | [SALES-PIPELINE-AND-STAGES.md](./SALES-PIPELINE-AND-STAGES.md) | Unified pipeline + Line of business |

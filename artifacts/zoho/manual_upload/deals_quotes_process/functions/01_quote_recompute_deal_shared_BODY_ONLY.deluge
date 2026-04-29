@@ -1,0 +1,39 @@
+qid = quoteId.toLong();
+quote = zoho.crm.getRecordById("Quotes", qid);
+if(quote == null)
+{
+	return;
+}
+dealLookup = quote.get("Deal_Name");
+if(dealLookup == null)
+{
+	dealLookup = quote.get("Potential_Name");
+}
+if(dealLookup == null)
+{
+	return;
+}
+dealId = dealLookup.get("id");
+if(dealId == null)
+{
+	return;
+}
+anyShared = false;
+linkedQuotes = zoho.crm.getRelatedRecords("Quotes", "Deals", dealId.toLong());
+if(linkedQuotes != null && linkedQuotes.size() > 0)
+{
+	for each q in linkedQuotes
+	{
+		shared = q.get("Quote_shared_with_customer");
+		if(shared == true || shared == "true")
+		{
+			anyShared = true;
+		}
+	}
+}
+upd = Map();
+upd.put("Any_quote_shared_with_customer", anyShared);
+opt = Map();
+opt.put("trigger", list());
+resp = zoho.crm.updateRecord("Deals", dealId.toLong(), upd, opt);
+return;

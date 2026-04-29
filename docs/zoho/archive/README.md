@@ -2,6 +2,8 @@
 
 Content here is **kept for traceability** (workshop decisions, retired designs). It is not the first place to read for current build work.
 
+**Active long-form agent prompts** (not archived history) live in [`../handoffs/`](../handoffs/).
+
 | Path | Contents |
 |------|----------|
 | [configuration-rounds/](configuration-rounds/) | **CONFIGURATION-ROUND3** through **ROUND8** — one capture per configuration workshop (2026) |

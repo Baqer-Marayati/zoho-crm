@@ -1,5 +1,5 @@
 # Convenience targets — requires GNU Make (macOS has it)
-.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-deal-stage-labels zoho-pipeline-refresh zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-audit-lead-conversion zoho-lead-layout-hide zoho-align-unused-from-leads zoho-lead-address-iraq zoho-lead-country-iraq-wf zoho-lead-country-iraq-client-script zoho-leads-industry-sector zoho-delete-lead-address-iraq zoho-delete-blueprints zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
+.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-deal-stage-labels zoho-pipeline-refresh zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-deals-quotes-process zoho-audit-lead-conversion zoho-lead-layout-hide zoho-align-unused-from-leads zoho-lead-address-iraq zoho-lead-country-iraq-wf zoho-lead-country-iraq-client-script zoho-leads-industry-sector zoho-delete-lead-address-iraq zoho-delete-blueprints zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
 .PHONY: zoho-cache-summary zoho-cache-refresh zoho-cache-status
 
 # Default: show common Zoho targets (fast orientation after clone)
@@ -104,6 +104,10 @@ zoho-phase2-layouts:
 # Phase 2: stage-probability API probe + field history tracking (Stage, Amount)
 zoho-phase2-tracking:
 	cd tools/zoho && ./venv/bin/python provision_phase2_tracking.py
+
+# Deals + Quotes: custom fields, layouts, workflows, Deluge guards, API gap probe
+zoho-deals-quotes-process:
+	cd tools/zoho && ./venv/bin/python provision_deals_quotes_process.py
 
 # Read-only: print lead → deal conversion mapping from Zoho metadata API
 zoho-audit-lead-conversion:
