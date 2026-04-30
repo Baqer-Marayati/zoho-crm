@@ -18,7 +18,7 @@
 
 ## 2. Territories
 
-1. **Setup → Users and Control → Territories** (or **Territory Management** — label varies by edition).  
+1. **Setup → Security Control → Territory Management** (labels vary slightly by edition / UI revision).  
 2. Define hierarchy (e.g. **Country → Region → City** or your real structure).  
 3. Assign **users** to territories; set rules for **Lead/Assignment** (round-robin vs manual).  
 4. **Important:** This sits **alongside** **Production vs MPS** specialty — a rep can be in a territory **and** specialized by line; confirm whether **assignment** is by territory, by specialty, or **both** (may need **workflows** or clear manual owner rules).

@@ -70,6 +70,7 @@ You may also see older or duplicate aliases (**user-CRM-Data-Metadata**, **user-
 **Gaps (still use `tools/zoho` Python today):**
 
 - **Custom functions:** MCP does not replace the CRM REST function catalog and source endpoints. Use `GET /crm/v8/settings/functions`, `GET /crm/v8/settings/functions/{api_name}/code`, multipart `POST`/`PUT /crm/v8/settings/functions` with a `.ds` code file, and `POST /crm/v8/settings/automation/functions` for workflow wrapper rows. Repo: `provision_deals_quotes_process.py`, `provision_quoted_line_machine_sku_workflow.py`, `zoho_doctor.py`.
+- **Client Scripts:** the public/MCP surface does not reliably create Developer Hub Client Scripts. Use the admin browser-session path in §4.1 when you need zero manual setup.
 - **Blueprint *definitions***, **some validation-rule writes**, and other settings not exposed in v8 docs — still product limits.
 
 **Agent discipline:** Read each tool’s JSON descriptor (parameters and constraints) before calling; workflow `post`/`update` payloads are strict (criteria shape, action ids, `GET /workflow_configurations` first when the tool says so).
@@ -92,6 +93,41 @@ These are product limits, not gaps in this repo:
 | **Custom function source** | Raw Deluge `POST /settings/automation/functions` can return `INVALID_DATA` for `arguments.function`. Prefer **`/settings/functions`** for source: `GET /settings/functions/{api_name}/code` reads Deluge, and multipart `POST`/`PUT /settings/functions` with JSON `metadata` plus a `.ds` `code` file creates/updates catalog functions. Workflow **instant actions** still need wrapper ids from **`GET /crm/v8/settings/automation/functions`** or a thin **`POST /settings/automation/functions`** with `function: {id: <catalog_id>}`. |
 | **Blueprint process graphs**, **some validation rules** | The UI location is **Setup → Process Management → Blueprint**. v8/v9 APIs and MCP metadata currently expose Blueprint support and record-level transition execution (`/{module}/{record_id}/actions/blueprint`), not settings-side Blueprint definition create/update. Design fallbacks with workflows + Deluge until Zoho exposes a definition endpoint. |
 | **Some org settings** | Teamspace, certain UI-only toggles, or API preview features may need a one-time UI action. The repo documents those in the relevant `docs/zoho/*.md` file. |
+
+### 4.1 Developer Hub Client Scripts via Safari admin session
+
+Use this when a task needs **Client Script** creation/update and the public APIs return `INVALID_REQUEST_METHOD`, `EXPECTED_PARAM_MISSING`, or missing `metadata/code` errors.
+
+**Prerequisite:** use an admin browser session, preferably **Safari** when Chrome is logged in as the test user. Ask the user to enable **Develop → Allow JavaScript from Apple Events** once. Then use `osascript` with `tell application "Safari" to do JavaScript ... in front document`.
+
+**Working endpoint family (observed 2026-04-30):**
+
+- `GET /crm/v2.2/settings/cscript_pages?include_extra_details=true`
+- `GET /crm/v2.2/settings/cscript_snippets?page_uuid=<page_uuid>`
+- `POST /crm/v2.2/settings/cscript_snippets` — creates a snippet and can auto-create the page.
+- `PUT /crm/v2.2/settings/cscript_snippets/<snippet_uuid>` — updates a snippet.
+- `PUT /crm/v2.2/settings/cscript_pages/<page_uuid>` — updates page metadata/static resources.
+
+Always send browser-session headers:
+
+- `X-ZCSRF-TOKEN: crmcsrfparam=<crmcsr cookie>`
+- `X-CRM-ORG: <org id>`
+- `Content-Type: application/json` for writes.
+
+**Payload rules discovered:**
+
+- Client Script code is not executed from raw `source_code`. Zoho executes compiled `async_code`.
+- Compile in the page using:
+  `Lyte.registeredMixins['crm-cscript-global-mixin'].compile_script(source, [])`
+- Send all three content keys: `content.source_code`, `content.async_code`, `content.source_map`.
+- Page metadata needs Zoho core static resources. Copy from a working page if needed: `ZRC-1.0`, `Kernel`, `ZDK-1.0`, `DotSDK-2.0`, `Concluder`. Without them, the target form can show `_cscript._globalEngine._state._c_cs_message = ["issue with cscript info/static resource"]`.
+- For Deals, the UI label is **Deals** but internal routes may use **Potentials**. Discover selector values from the page (`get_module_definitions`) rather than guessing.
+
+**Verification:**
+
+1. Reload the target form.
+2. Inspect `_cscript._globalEngine._state` in the browser session.
+3. Confirm the target script resource URL is loaded and the expected form labels/behavior changed.
 
 ## 5. Operating discipline
 

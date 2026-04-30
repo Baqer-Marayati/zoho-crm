@@ -28,3 +28,18 @@ Ask one quick confirm before:
 - Re-running the same approved script after a fix.
 
 If a command fails (missing `.env`, scope, DC URL), **diagnose and fix or report** in the same turn instead of stopping at “you should run X.”
+
+## Zoho Client Script automation (Developer Hub)
+
+Public v8/MCP does **not** reliably create CRM Client Scripts. If normal REST/MCP fails, use the admin browser session:
+
+- Prefer **Safari admin session** if Chrome is logged in as a test user. Ask the user to enable **Safari → Develop → Allow JavaScript from Apple Events** once.
+- Use `osascript` + `do JavaScript` in Safari to call Zoho's internal endpoints with browser cookies:
+  - `GET/PUT /crm/v2.2/settings/cscript_pages`
+  - `GET/POST/PUT /crm/v2.2/settings/cscript_snippets`
+  - headers: `X-ZCSRF-TOKEN: crmcsrfparam=<crmcsr cookie>`, `X-CRM-ORG: <org id>`, `Content-Type: application/json`.
+- Do **not** use raw JS as `async_code`. Compile with Zoho's in-page helper:
+  `Lyte.registeredMixins['crm-cscript-global-mixin'].compile_script(source, [])`, then send `content.source_code`, `content.async_code`, and `content.source_map`.
+- Client Script pages need core static resources copied from working pages (`ZRC-1.0`, `Kernel`, `ZDK-1.0`, `DotSDK-2.0`, `Concluder`). If missing, runtime state shows `issue with cscript info/static resource`.
+- For Deals Client Scripts, discover selector values from the UI (`get_module_definitions`); Zoho may route Deals internally as `Potentials`.
+- Verify on the target form with `_cscript._globalEngine._state` and by checking visible labels after reload.

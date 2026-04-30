@@ -114,7 +114,7 @@ Official overview: [Zoho — customize deal stage / pipeline tips](https://www.z
 
 ### 4.3 Access: who can change stages
 
-1. **Setup** → **Users and Control** → **Security** → **Profiles** (and **Roles** if you use hierarchy).
+1. **Setup** → **Security Control** → **Profiles** (and **Roles and Sharing** if you use hierarchy).
 2. Confirm sales roles can **edit** Deals and the **Stage** field; restrict if only managers may close won/lost.
 
 If **Pipelines** is missing: **Setup** → **Customization** → **Modules and Fields** → **Organize Modules** — ensure **Deals** is enabled. See [Zoho troubleshooting — pipelines](https://help.zoho.com/portal/en/kb/crm/troubleshooting-tips/articles/troubleshooting-pipelines).

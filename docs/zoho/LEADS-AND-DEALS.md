@@ -16,11 +16,11 @@ You described **specialist reps**. Mirror that in Zoho so permissions and defaul
 
 If you are still in **admin-only** setup, you may defer this until **Phase 1** (immediately before licenses and user assignment) and complete **§4 conversion mapping** first — see [`IMPLEMENTATION-CHECKLIST.md`](./IMPLEMENTATION-CHECKLIST.md) **Execution order**.
 
-1. **Setup → Users and Control → Security → Roles**  
+1. **Setup → Security Control → Roles and Sharing**  
    - Example: `Sales — Production`, `Sales — MPS`, `Sales Manager`, `CRM Admin`.  
    - Hierarchy only if you truly need roll-up reporting by manager.
 
-2. **Setup → Users and Control → Security → Profiles**  
+2. **Setup → Security Control → Profiles**  
    - Tie each profile to what they may **see** and **edit** (Leads, Deals, Quotes, Products).  
    - **4–10 users:** keep **2–3 sales profiles** by line (Production / MPS / Radiology) plus manager/admin, or one profile with workflows — see [`SALES-PIPELINE-AND-STAGES.md`](./SALES-PIPELINE-AND-STAGES.md).
 
