@@ -9,9 +9,13 @@ want on the layout. Any omitted Stage option is moved to Unused and disappears f
 
 Renames applied (display only; **actual_value** stays as in Zoho for API stability):
 
-  Value Proposition      → Solution / Value
-  Proposal/Price Quote   → Quote Sent
+  Value Proposition      → Proposal / Quote
+  Proposal/Price Quote   → Proposal / Quote
+  Solution / Value       → Proposal / Quote (already-renamed orgs)
+  Quote Sent             → Proposal / Quote (already-renamed orgs)
   Negotiation/Review     → Negotiation
+
+When two layout options collapse to the same display, this script keeps the **first** picklist row Zoho returns and drops the duplicate key; **bulk-replace legacy Stage values** on open Deals before/after if any records still point at the merged-away id.
 
 Requires: ZohoCRM.settings.layouts.UPDATE, ZohoCRM.settings.fields.READ (or settings.ALL).
 
@@ -41,8 +45,10 @@ DEALS_MODULE = "Deals"
 
 # Old label → new label (display in UI / pipeline). Match pipelines_seed.json.
 STAGE_RENAME: dict[str, str] = {
-    "Value Proposition": "Solution / Value",
-    "Proposal/Price Quote": "Quote Sent",
+    "Value Proposition": "Proposal / Quote",
+    "Proposal/Price Quote": "Proposal / Quote",
+    "Solution / Value": "Proposal / Quote",
+    "Quote Sent": "Proposal / Quote",
     "Negotiation/Review": "Negotiation",
 }
 

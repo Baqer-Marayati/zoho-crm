@@ -28,15 +28,14 @@ Keep **stage names short and in plain language** your team will actually say on 
 | **Reporting** | CRM list views, dashboards, and **Power BI** — slice/filter by **Line of business**. |
 | **Rep scope** | Optional: profiles + workflows so a rep’s **Line of business** defaults or is validated against a **User** field (see workshop notes). |
 
-**Stage order** (versioned in [`tools/zoho/pipelines_seed.json`](../../tools/zoho/pipelines_seed.json)) — **7 stages**: short names for reps; **Quote Sent** means a **formal customer quotation/PDF** has been sent.
+**Stage order** (versioned in [`tools/zoho/pipelines_seed.json`](../../tools/zoho/pipelines_seed.json)) — **6 stages**: short names for reps; **Proposal / Quote** combines solution design and having a **formal Zoho Quote** on the deal (see provisioning docs for gates and follow-up tasks).
 
 1. Qualification  
 2. Needs Analysis  
-3. Solution / Value
-4. Quote Sent
-5. Negotiation
-6. Closed Won  
-7. Closed Lost  
+3. Proposal / Quote  
+4. Negotiation  
+5. Closed Won  
+6. Closed Lost  
 
 **Competitive losses** use **Closed Lost** plus **Competitor** and **Lost Reason** (no separate stage). After edits to the seed file, run **`provision_deal_stage_picklist.py`** (PATCHes the **Standard Deals layout** so Stage **pick_list_values** include only the active seed stages, in order; omitted values like **Identify Decision Makers** move to Unused and disappear from Stage View), then **`provision_pipelines.py --sync`**, then **`provision_phase2_layouts.py`** to refresh Stage → Lost Reason / Competitor maps (requires settings OAuth scopes).
 

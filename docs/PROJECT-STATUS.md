@@ -18,7 +18,7 @@
 
 - Zoho **edition** and add-ons (e.g. Sign)
 - Power BI: **Pro vs Premium/Fabric** for viewers — one answer from IT
-- Optional **Blueprint** process graph on Deals (**Setup → Process Management → Blueprint**) — not required while **workflows + `deal_stage_gate_guard` Deluge** cover stage gates (`docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md`)
+- Optional **Blueprint** process graph on Deals (**Setup → Process Management → Blueprint**) — not required while server-side workflow rollback rules cover the current Proposal / Quote gate (`docs/zoho/DEALS-QUOTES-PROCESS-PROVISIONING.md`)
 
 ## Next steps
 

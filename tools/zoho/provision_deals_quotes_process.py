@@ -46,8 +46,7 @@ TASKS = "Tasks"
 STAGES = [
     "Qualification",
     "Needs Analysis",
-    "Solution / Value",
-    "Quote Sent",
+    "Proposal / Quote",
     "Negotiation",
     "Closed Won",
     "Closed Lost",
@@ -70,6 +69,18 @@ LOST_REASON_VALUES = [
     "Project paused",
     "Tender lost but future opportunities",
 ]
+
+DISCOVERY_TASK_DESCRIPTION = "\n".join(
+    [
+        "Complete these discovery fields while the Deal is in Needs Analysis:",
+        "- Discovery summary (Discovery_summary)",
+        "- Current machines / setup (Current_machines_setup)",
+        "- Applications (Applications)",
+        "- Budget / financing status (Budget_financing_status)",
+        "Budget / financing status must be selected from the picklist, not entered as prose.",
+        "Proposal / Quote is blocked until these fields are complete.",
+    ]
+)
 
 DEAL_FIELD_SPECS = [
     {"field_label": "Discovery summary", "data_type": "textarea", "textarea": {"type": "large"}},
@@ -1083,6 +1094,98 @@ def _task_mapping_due_offset(task_fields: dict[str, dict[str, Any]], days: int) 
     }
 
 
+def _task_field_mappings(
+    task_fields: dict[str, dict[str, Any]],
+    *,
+    subject: str,
+    due_days: int | None = None,
+    due_merge_field: str | None = None,
+    owner_merge_field: str | None = None,
+    priority: str = "Normal",
+    description: str = "",
+) -> list[dict[str, Any]]:
+    mappings = [
+        _task_mapping_static(task_fields, "Subject", subject),
+        _task_mapping_static(task_fields, "Status", "Not Started"),
+        _task_mapping_static(task_fields, "Priority", priority),
+    ]
+    if due_merge_field:
+        # Zoho v8 currently rejects merge-field values for Tasks.Due_Date automation mappings
+        # in this org. Keep the intent in Description and use an immediate task.
+        mappings.append(_task_mapping_due_offset(task_fields, 0))
+    elif due_days is not None:
+        mappings.append(_task_mapping_due_offset(task_fields, due_days))
+    if owner_merge_field:
+        # In this org, Zoho's Automation Task API accepts but drops Description and
+        # owner merge-field mappings. Use Deluge-created tasks when those details matter.
+        pass
+    return mappings
+
+
+def _automation_task_detail(
+    session: requests.Session,
+    api_domain: str,
+    task_id: str,
+) -> dict[str, Any] | None:
+    r = _crm(session, api_domain, "GET", f"/settings/automation/tasks/{task_id}")
+    if not r.ok or r.status_code == 204 or not (r.text or "").strip():
+        if not r.ok:
+            print(f"  GET automation task {task_id} HTTP {r.status_code}: {r.text[:1000]}", file=sys.stderr)
+        return None
+    return (r.json().get("tasks") or [None])[0]
+
+
+def _normalized_task_mapping_signature(mappings: list[dict[str, Any]]) -> list[tuple[str, str, str]]:
+    out: list[tuple[str, str, str]] = []
+    for mapping in mappings:
+        field = mapping.get("field") or {}
+        if str(field.get("api_name") or "") == "Description":
+            # Zoho preserves/drops Automation Task Description mappings inconsistently.
+            # Needs Analysis uses Deluge task creation for the required checklist.
+            continue
+        value = mapping.get("value")
+        if isinstance(value, dict):
+            value_text = json.dumps(value, sort_keys=True, separators=(",", ":"))
+        elif isinstance(value, list):
+            value_text = json.dumps(value, sort_keys=True, separators=(",", ":"))
+        else:
+            value_text = "" if value is None else str(value)
+        out.append((str(field.get("api_name") or ""), str(mapping.get("type") or ""), value_text))
+    return sorted(out)
+
+
+def _update_task_action_if_needed(
+    session: requests.Session,
+    api_domain: str,
+    *,
+    task_id: str,
+    name: str,
+    mappings: list[dict[str, Any]],
+    dry_run: bool,
+) -> str | None:
+    detail = _automation_task_detail(session, api_domain, task_id)
+    if detail:
+        current = detail.get("field_mappings") or []
+        if _normalized_task_mapping_signature(current) == _normalized_task_mapping_signature(mappings):
+            print(f"  Automation task current: {name} id={task_id}")
+            return None
+
+    body = {"tasks": [{"field_mappings": mappings}]}
+    print(f"  PUT automation task {name!r} id={task_id}")
+    if dry_run:
+        print(json.dumps(body, indent=2)[:3000])
+        return None
+    r = _crm(session, api_domain, "PUT", f"/settings/automation/tasks/{task_id}", json=body)
+    if not r.ok:
+        print(f"  PUT automation task HTTP {r.status_code}: {r.text[:4000]}", file=sys.stderr)
+        return f"Automation task {name} could not be updated via API: HTTP {r.status_code} {r.text[:1000]}"
+    print(json.dumps(r.json(), indent=2)[:2000])
+    refreshed = _automation_task_detail(session, api_domain, task_id)
+    if refreshed and _normalized_task_mapping_signature(refreshed.get("field_mappings") or []) == _normalized_task_mapping_signature(mappings):
+        return None
+    return f"Automation task {name} update response was successful but verification did not match desired field mappings."
+
+
 def _ensure_task_action(
     session: requests.Session,
     api_domain: str,
@@ -1098,28 +1201,29 @@ def _ensure_task_action(
     priority: str = "Normal",
     description: str = "",
     dry_run: bool,
-) -> str | None:
+) -> tuple[str | None, str | None]:
     existing = _find_automation_task_id(session, api_domain, name, module) or _find_automation_task_id(
         session, api_domain, subject, module
     )
+    mappings = _task_field_mappings(
+        task_fields,
+        subject=subject,
+        due_days=due_days,
+        due_merge_field=due_merge_field,
+        owner_merge_field=owner_merge_field,
+        priority=priority,
+        description=description,
+    )
     if existing:
-        print(f"  Automation task exists: {name} id={existing}")
-        return existing
-    mappings = [
-        _task_mapping_static(task_fields, "Subject", subject),
-        _task_mapping_static(task_fields, "Status", "Not Started"),
-        _task_mapping_static(task_fields, "Priority", priority),
-    ]
-    if due_merge_field:
-        # Zoho v8 currently rejects merge-field values for Tasks.Due_Date automation mappings
-        # in this org. Keep the intent in Description and use an immediate task.
-        mappings.append(_task_mapping_due_offset(task_fields, 0))
-    elif due_days is not None:
-        mappings.append(_task_mapping_due_offset(task_fields, due_days))
-    if owner_merge_field:
-        description = f"{description}\nIntended assignee: {owner_merge_field}".strip()
-    if description:
-        mappings.append(_task_mapping_static(task_fields, "Description", description))
+        gap = _update_task_action_if_needed(
+            session,
+            api_domain,
+            task_id=existing,
+            name=name,
+            mappings=mappings,
+            dry_run=dry_run,
+        )
+        return existing, gap
     body = {
         "tasks": [
             {
@@ -1133,17 +1237,17 @@ def _ensure_task_action(
     print(f"  POST automation task {name!r}")
     if dry_run:
         print(json.dumps(body, indent=2)[:3000])
-        return "dry_run"
+        return "dry_run", None
     r = _crm(session, api_domain, "POST", "/settings/automation/tasks", json=body)
     if not r.ok:
         print(f"  POST automation tasks HTTP {r.status_code}: {r.text[:4000]}", file=sys.stderr)
-        return None
+        return None, f"Automation task {name} could not be created via API: HTTP {r.status_code} {r.text[:1000]}"
     print(json.dumps(r.json(), indent=2)[:2000])
     for item in r.json().get("tasks") or []:
         tid = (item.get("details") or {}).get("id") or item.get("id")
         if item.get("code") == "SUCCESS" and tid:
-            return str(tid)
-    return None
+            return str(tid), None
+    return None, f"Automation task {name} create response did not include an id."
 
 
 def _criterion(field: dict[str, Any], comparator: str, value: Any) -> dict[str, Any]:
@@ -1184,6 +1288,75 @@ def _find_workflow_id(
     return None
 
 
+def _find_field_update_id(
+    session: requests.Session,
+    api_domain: str,
+    module: str,
+    name: str,
+) -> str | None:
+    r = _crm(
+        session,
+        api_domain,
+        "GET",
+        "/settings/automation/field_updates",
+        params={"module": module, "feature_type": "workflow", "per_page": 200},
+    )
+    if not r.ok:
+        print(f"  GET field_updates HTTP {r.status_code}: {r.text[:1000]}", file=sys.stderr)
+        return None
+    if r.status_code == 204 or not (r.text or "").strip():
+        return None
+    for update in r.json().get("field_updates") or []:
+        if update.get("name") == name and update.get("id"):
+            return str(update["id"])
+    return None
+
+
+def _ensure_stage_rollback_field_update(
+    session: requests.Session,
+    api_domain: str,
+    modules: dict[str, dict[str, Any]],
+    deal_fields: dict[str, dict[str, Any]],
+    dry_run: bool,
+) -> str | None:
+    """Shared field update used by native rollback workflows.
+
+    This is the canonical Proposal / Quote gate in the current org because Kanban/API
+    stage edits bypass Client Scripts and the workflow function wrapper has no dealId mapping.
+    """
+    name = "Deal gate rollback to Needs Analysis"
+    existing = _find_field_update_id(session, api_domain, DEALS, name)
+    if existing:
+        print(f"  Field update exists: {name} id={existing}")
+        return existing
+    body = {
+        "field_updates": [
+            {
+                "name": name,
+                "module": {"api_name": DEALS, "id": str(modules[DEALS]["id"])},
+                "field": {"api_name": "Stage", "id": str(deal_fields["Stage"]["id"])},
+                "type": "static",
+                "value": "Needs Analysis",
+                "feature_type": "workflow",
+            }
+        ]
+    }
+    print(f"  POST field update {name!r}")
+    if dry_run:
+        print(json.dumps(body, indent=2)[:2500])
+        return "dry_run"
+    r = _crm(session, api_domain, "POST", "/settings/automation/field_updates", json=body)
+    if not r.ok:
+        print(f"  POST field_updates HTTP {r.status_code}: {r.text[:4000]}", file=sys.stderr)
+        return None
+    print(json.dumps(r.json(), indent=2)[:2000])
+    for item in r.json().get("field_updates") or []:
+        fid = (item.get("details") or {}).get("id") or item.get("id")
+        if item.get("code") == "SUCCESS" and fid:
+            return str(fid)
+    return None
+
+
 def _create_workflow(
     session: requests.Session,
     api_domain: str,
@@ -1194,7 +1367,20 @@ def _create_workflow(
     name = body["workflow_rules"][0]["name"]
     existing = _find_workflow_id(session, api_domain, module, name)
     if existing:
-        print(f"  Workflow exists: {name} id={existing}")
+        # Zoho may reject PUTs to existing workflow criteria with duplicate-condition or
+        # condition-limit errors. Only the legacy aggregate guard is updated in place.
+        if name != "Deal - stage gate guard":
+            print(f"  Workflow exists: {name} id={existing}")
+            return existing
+        print(f"  PUT workflow {name!r} id={existing}")
+        if dry_run:
+            print(json.dumps(body, indent=2)[:5000])
+            return existing
+        r = _crm(session, api_domain, "PUT", f"/settings/automation/workflow_rules/{existing}", json=body)
+        if not r.ok:
+            print(f"  PUT workflow_rules HTTP {r.status_code}: {r.text[:6000]}", file=sys.stderr)
+            return None
+        print(json.dumps(r.json(), indent=2)[:2500])
         return existing
     print(f"  POST workflow {name!r}")
     if dry_run:
@@ -1249,6 +1435,8 @@ def _stage_update_trigger(
     modules: dict[str, dict[str, Any]],
     fields: dict[str, dict[str, Any]],
     stage_value: str,
+    *,
+    repeat: bool = False,
 ) -> dict[str, Any]:
     stage = fields["Stage"]
     return {
@@ -1256,7 +1444,7 @@ def _stage_update_trigger(
         "details": {
             "trigger_module": {"api_name": DEALS, "id": str(modules[DEALS]["id"])},
             "criteria": _criterion(stage, "equal", stage_value),
-            "repeat": False,
+            "repeat": repeat,
             "match_all": True,
         },
     }
@@ -1266,6 +1454,8 @@ def _field_any_update_trigger(
     modules: dict[str, dict[str, Any]],
     module: str,
     field: dict[str, Any],
+    *,
+    repeat: bool = False,
 ) -> dict[str, Any]:
     return {
         "type": "field_update",
@@ -1276,7 +1466,7 @@ def _field_any_update_trigger(
                 "field": {"api_name": field["api_name"], "id": str(field["id"])},
                 "value": "${ANYVALUE}",
             },
-            "repeat": False,
+            "repeat": repeat,
             "match_all": True,
         },
     }
@@ -1298,12 +1488,30 @@ def _ensure_workflows(
         raise RuntimeError(f"Tasks fields missing from metadata: {missing_task_fields}")
 
     task_ids: dict[str, str] = {}
+    gaps: list[str] = []
     task_specs = [
         (LEADS, "Lead - contact same day task", "Contact lead", 0, None, "${!Leads.Owner}", "High", "Contact the new lead and qualify interest."),
         (DEALS, "Deal - schedule discovery task", "Schedule discovery / confirm opportunity", 2, None, "${!Deals.Owner}", "Normal", "Qualification follow-up."),
-        (DEALS, "Deal - complete discovery task", "Complete discovery fields on Deal", 3, None, "${!Deals.Owner}", "Normal", "Complete Discovery summary, Current machines, Applications, and Budget / financing status."),
-        (DEALS, "Deal - finalize solution task", "Finalize configuration; create Quote(s); set Primary Quote", 5, None, "${!Deals.Owner}", "Normal", "Prepare the official quote options in Zoho Quotes."),
-        (DEALS, "Deal - follow up on quote task", "Follow up on quote", 2, None, "${!Deals.Owner}", "High", "Customer has a quote in Zoho; follow up in two days."),
+        (
+            DEALS,
+            "Deal - complete discovery task",
+            "Complete discovery on Deal - Needs Analysis",
+            3,
+            None,
+            "${!Deals.Owner}",
+            "Normal",
+            DISCOVERY_TASK_DESCRIPTION,
+        ),
+        (
+            DEALS,
+            "Deal - proposal quote task",
+            "Finalize proposal / quote — create Quote(s); set Primary Quote; follow up",
+            3,
+            None,
+            "${!Deals.Owner}",
+            "Normal",
+            "Complete official quote(s) in Zoho Quotes, set Primary Quote, then follow up with the customer.",
+        ),
         (DEALS, "Deal - negotiation timeline task", "Confirm decision timeline; address objections", 3, None, "${!Deals.Owner}", "Normal", "Negotiation follow-up."),
         (DEALS, "Deal - handoff kickoff task", "Handoff / delivery kickoff", 1, None, "${!Deals.Owner}", "High", "Closed Won delivery handoff."),
         (DEALS, "Deal - revisit closed lost task", "Revisit closed-lost opportunity", None, "${!Deals.Next_try_follow_up_date}", "${!Deals.Owner}", "Normal", "Follow up on the next try date captured at Closed Lost."),
@@ -1312,7 +1520,7 @@ def _ensure_workflows(
         (DEALS, "Deal - closed won manager notification task", "Closed Won: manager review", 0, None, "${!Deals.Owner.Reporting_To}", "High", "Sales manager notification for Closed Won. Review amount, deal, and Primary Quote."),
     ]
     for module, name, subject, due_days, due_merge, owner_merge, priority, desc in task_specs:
-        tid = _ensure_task_action(
+        tid, task_gap = _ensure_task_action(
             session,
             api_domain,
             modules,
@@ -1327,15 +1535,24 @@ def _ensure_workflows(
             description=desc,
             dry_run=dry_run,
         )
+        if task_gap:
+            gaps.append(task_gap)
         if tid:
             task_ids[name] = tid
 
     print("\n== Workflow Rules ==")
     ok = True
-    gaps: list[str] = []
     deal_fields = fields[DEALS]
     quote_fields = fields[QUOTES]
     stage = deal_fields["Stage"]
+    rollback_field_update_id = _ensure_stage_rollback_field_update(
+        session, api_domain, modules, deal_fields, dry_run
+    )
+    if not rollback_field_update_id:
+        gaps.append(
+            "Proposal / Quote server-side rollback workflows could not be created because "
+            "the Stage rollback field update action failed."
+        )
 
     def task_action(name: str) -> dict[str, str]:
         tid = task_ids.get(name)
@@ -1369,14 +1586,25 @@ def _ensure_workflows(
         ),
     ]
 
-    stage_task_map = {
-        "Needs Analysis": "Deal - complete discovery task",
-        "Solution / Value": "Deal - finalize solution task",
-        "Quote Sent": "Deal - follow up on quote task",
-        "Negotiation": "Deal - negotiation timeline task",
-        "Closed Won": "Deal - handoff kickoff task",
+    if "deal_stage_gate_guard" in function_ids:
+        needs_analysis_actions = [
+            task_action("Deal - complete discovery task"),
+            {"type": "functions", "id": function_ids["deal_stage_gate_guard"]},
+        ]
+    else:
+        needs_analysis_actions = [task_action("Deal - complete discovery task")]
+        gaps.append(
+            "Needs Analysis task workflow fell back to an Automation Task action because "
+            "deal_stage_gate_guard is unavailable; Zoho may omit the task Description checklist."
+        )
+
+    stage_action_map = {
+        "Needs Analysis": needs_analysis_actions,
+        "Proposal / Quote": [task_action("Deal - proposal quote task")],
+        "Negotiation": [task_action("Deal - negotiation timeline task")],
+        "Closed Won": [task_action("Deal - handoff kickoff task")],
     }
-    for stage_value, task_name in stage_task_map.items():
+    for stage_value, actions in stage_action_map.items():
         workflow_specs.append(
             (
                 DEALS,
@@ -1386,10 +1614,65 @@ def _ensure_workflows(
                     f"Deal stage - {stage_value} task",
                     f"Auto-create stakeholder-agreed follow-up task when Deal enters {stage_value}.",
                     _stage_update_trigger(modules, deal_fields, stage_value),
-                    [task_action(task_name)],
+                    actions,
                 ),
             )
         )
+
+    if rollback_field_update_id:
+        proposal_required_fields = [
+            ("Discovery summary", "Discovery_summary"),
+            ("Current machines setup", "Current_machines_setup"),
+            ("Applications", "Applications"),
+            ("Budget financing status", "Budget_financing_status"),
+            ("Amount", "Amount"),
+            ("Primary Quote", "Primary_Quote"),
+        ]
+        for label, api_name in proposal_required_fields:
+            required_field = deal_fields.get(api_name)
+            if not required_field:
+                gaps.append(f"Proposal / Quote rollback workflow skipped missing Deals.{api_name}.")
+                continue
+            workflow_specs.append(
+                (
+                    DEALS,
+                    _workflow_base(
+                        modules,
+                        DEALS,
+                        f"Deal gate rollback - Proposal missing {label}",
+                        f"Server-side rollback to Needs Analysis when Proposal / Quote is missing {label}.",
+                        _stage_update_trigger(modules, deal_fields, "Proposal / Quote", repeat=True),
+                        [{"type": "field_updates", "id": rollback_field_update_id}],
+                        _and(
+                            [
+                                _criterion(stage, "equal", "Proposal / Quote"),
+                                _criterion(required_field, "equal", "${EMPTY}"),
+                            ]
+                        ),
+                    ),
+                )
+            )
+        budget_field = deal_fields.get("Budget_financing_status")
+        if budget_field:
+            workflow_specs.append(
+                (
+                    DEALS,
+                    _workflow_base(
+                        modules,
+                        DEALS,
+                        "Deal gate rollback - Proposal budget none",
+                        "Server-side rollback to Needs Analysis when Budget / financing status is -None-.",
+                        _stage_update_trigger(modules, deal_fields, "Proposal / Quote", repeat=True),
+                        [{"type": "field_updates", "id": rollback_field_update_id}],
+                        _and(
+                            [
+                                _criterion(stage, "equal", "Proposal / Quote"),
+                                _criterion(budget_field, "equal", "-None-"),
+                            ]
+                        ),
+                    ),
+                )
+            )
 
     next_try_field = deal_fields.get("Next_try_follow_up_date")
     if next_try_field:
@@ -1522,8 +1805,8 @@ def _ensure_workflows(
                     modules,
                     DEALS,
                     "Deal - stage gate guard",
-                    "Post-save guard for discovery, Quote Sent, Negotiation, Closed Won, and Closed Lost rules where Blueprint definition API is unavailable.",
-                    _field_any_update_trigger(modules, DEALS, stage),
+                    "Post-save guard for Proposal / Quote, Negotiation, Closed Won, and Closed Lost rules where Blueprint definition API is unavailable.",
+                    _field_any_update_trigger(modules, DEALS, stage, repeat=True),
                     [{"type": "functions", "id": function_ids["deal_stage_gate_guard"]}],
                 ),
             )

@@ -1,5 +1,5 @@
 # Convenience targets — requires GNU Make (macOS has it)
-.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-deal-stage-labels zoho-pipeline-refresh zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-deals-quotes-process zoho-deals-stage-visibility-client-script zoho-audit-lead-conversion zoho-lead-layout-hide zoho-align-unused-from-leads zoho-lead-address-iraq zoho-lead-country-iraq-wf zoho-lead-country-iraq-client-script zoho-leads-industry-sector zoho-delete-lead-address-iraq zoho-delete-blueprints zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
+.PHONY: help docs-help venv zoho-venv zoho-setup zoho-connect zoho-exchange zoho-ping zoho-doctor zoho-provision-pipelines zoho-sync-pipelines zoho-deal-stage-labels zoho-merge-proposal-quote-stage zoho-pipeline-refresh zoho-provision-teamspace-direct-department zoho-quote-template zoho-quote-template-replace zoho-quote-line-extensions zoho-quoted-line-deps zoho-quote-line-product-first-layout zoho-quote-line-hide-sku zoho-quote-line-machine-sku-wf zoho-cpq-product-configurator-pilot zoho-sync-canon-product-descriptions zoho-sync-product-catalog zoho-upload-canon-product-pdfs zoho-upload-product-images zoho-audit-zoho-products zoho-phase2-fields zoho-phase2-layouts zoho-phase2-tracking zoho-deals-quotes-process zoho-deals-stage-visibility-client-script zoho-audit-lead-conversion zoho-lead-layout-hide zoho-align-unused-from-leads zoho-lead-address-iraq zoho-lead-country-iraq-wf zoho-lead-country-iraq-client-script zoho-leads-industry-sector zoho-delete-lead-address-iraq zoho-delete-blueprints zoho-build-canon-products-en zoho-build-canon-five-machines zoho-sync-canon-five-products zoho-phase3 zoho-phase3-products zoho-phase3-canon-products zoho-phase3-canon-five-machines zoho-phase3-canon-colorado zoho-phase3-canon-lfp-me zoho-phase3-verify
 .PHONY: zoho-cache-summary zoho-cache-refresh zoho-cache-status
 
 # Default: show common Zoho targets (fast orientation after clone)
@@ -88,7 +88,11 @@ zoho-deal-stage-labels:
 
 # Full pipeline refresh: Stage labels, Standard pipeline order, Stage→Lost/Competitor maps
 zoho-pipeline-refresh:
-	$(MAKE) zoho-deal-stage-labels zoho-sync-pipelines zoho-phase2-layouts
+	$(MAKE) zoho-deal-stage-labels zoho-sync-pipelines zoho-phase2-layouts zoho-merge-proposal-quote-stage
+
+# Merge live Deals/automation from removed Solution/Value + Quote Sent stages into Proposal / Quote
+zoho-merge-proposal-quote-stage:
+	cd tools/zoho && ./venv/bin/python merge_proposal_quote_stage.py
 
 # Next Gen teamspace "Direct department" from artifacts/zoho/teamspace/direct_department.json
 zoho-provision-teamspace-direct-department:

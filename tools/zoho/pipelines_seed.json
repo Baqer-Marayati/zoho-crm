@@ -8,13 +8,12 @@
       "stages": [
         "Qualification",
         "Needs Analysis",
-        "Solution / Value",
-        "Quote Sent",
+        "Proposal / Quote",
         "Negotiation",
         "Closed Won",
         "Closed Lost"
       ],
-      "notes": "7 stages (2026-04-27): Solution/Value + Quote Sent + Negotiation (formal PDF sent = Quote Sent). Identify Decision Makers removed from pipeline and moved off the Standard layout; Closed Lost + Lost Reason + Competitor only. Legacy Stage picklist values may remain as unused options for historical data."
+      "notes": "6 stages (2026-04-30): Proposal / Quote merges former Solution/Value + Quote Sent (formal Zoho quote exists; follow-up and share flags as before). Negotiation + Closed outcomes unchanged. Legacy Stage labels may remain as unused picklist rows for historical deals."
     }
   ]
 }

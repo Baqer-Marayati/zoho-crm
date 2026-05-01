@@ -10,7 +10,57 @@ discoverySummary = ifnull(deal.get("Discovery_summary"), "").toString().trim();
 currentMachines = ifnull(deal.get("Current_machines_setup"), "").toString().trim();
 applications = ifnull(deal.get("Applications"), "").toString().trim();
 budgetStatus = ifnull(deal.get("Budget_financing_status"), "").toString().trim();
-if(stage == "Solution / Value" || stage == "Quote Sent")
+discoveryIncomplete = false;
+if(discoverySummary == "" || currentMachines == "" || applications == "" || budgetStatus == "" || budgetStatus == "-None-")
+{
+	discoveryIncomplete = true;
+}
+if(stage == "Needs Analysis")
+{
+	subject = "Complete discovery on Deal - Needs Analysis";
+	description = "Complete these discovery fields while the Deal is in Needs Analysis:\n";
+	description = description + "- Discovery summary (Discovery_summary)\n";
+	description = description + "- Current machines / setup (Current_machines_setup)\n";
+	description = description + "- Applications (Applications)\n";
+	description = description + "- Budget / financing status (Budget_financing_status)\n";
+	description = description + "Budget / financing status must be selected from the picklist, not entered as prose.\n";
+	description = description + "Proposal / Quote is blocked until these fields are complete.";
+	keptTask = false;
+	relatedTasks = zoho.crm.getRelatedRecords("Tasks", "Deals", did);
+	if(relatedTasks != null && relatedTasks.size() > 0)
+	{
+		for each task in relatedTasks
+		{
+			taskSubject = ifnull(task.get("Subject"), "").toString();
+			taskStatus = ifnull(task.get("Status"), "").toString();
+			if((taskSubject == subject || taskSubject == "Complete discovery fields on Deal") && taskStatus != "Completed" && taskStatus != "Closed")
+			{
+				taskId = task.get("id");
+				taskUpd = Map();
+				if(!keptTask)
+				{
+					taskUpd.put("Subject", subject);
+					taskUpd.put("Due_Date", zoho.currentdate.addDay(3).toString("yyyy-MM-dd"));
+					taskUpd.put("Status", "Not Started");
+					taskUpd.put("Priority", "Normal");
+					taskUpd.put("Description", description);
+					keptTask = true;
+				}
+				else
+				{
+					taskUpd.put("Status", "Completed");
+					taskUpd.put("Description", "Closed duplicate Needs Analysis discovery task; the active checklist task remains on this Deal.");
+				}
+				if(taskId != null)
+				{
+					taskResp = zoho.crm.updateRecord("Tasks", taskId.toLong(), taskUpd);
+				}
+			}
+		}
+	}
+	return;
+}
+if(stage == "Proposal / Quote")
 {
 	if(discoverySummary == "")
 	{
@@ -28,9 +78,6 @@ if(stage == "Solution / Value" || stage == "Quote Sent")
 	{
 		missing.add("Budget / financing status");
 	}
-}
-if(stage == "Quote Sent")
-{
 	amount = deal.get("Amount");
 	if(amount == null || amount.toString().trim() == "")
 	{
@@ -95,17 +142,16 @@ if(missing.size() == 0)
 }
 message = "Stage gate failed for " + stage + ". Missing: " + missing.toString();
 fallback = "";
-if(stage == "Solution / Value")
+if(stage == "Proposal / Quote")
 {
-	fallback = "Needs Analysis";
-}
-else if(stage == "Quote Sent")
-{
-	fallback = "Solution / Value";
+	if(discoveryIncomplete)
+	{
+		fallback = "Needs Analysis";
+	}
 }
 else if(stage == "Negotiation")
 {
-	fallback = "Quote Sent";
+	fallback = "Proposal / Quote";
 }
 else if(stage == "Closed Won")
 {

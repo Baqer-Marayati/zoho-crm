@@ -35,7 +35,7 @@
       },
       "full_signature_file": "functions/03_deal_stage_gate_guard_FULL.deluge",
       "body_only_file": "functions/03_deal_stage_gate_guard_BODY_ONLY.deluge",
-      "purpose": "Post-save stage gate enforcement for discovery, Quote Sent, Negotiation, Closed Won, and Closed Lost."
+      "purpose": "Post-save stage gate enforcement for Proposal / Quote, Negotiation, Closed Won, and Closed Lost."
     }
   ]
 }

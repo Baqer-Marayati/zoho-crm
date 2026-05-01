@@ -94,6 +94,16 @@ These are product limits, not gaps in this repo:
 | **Blueprint process graphs**, **some validation rules** | The UI location is **Setup → Process Management → Blueprint**. v8/v9 APIs and MCP metadata currently expose Blueprint support and record-level transition execution (`/{module}/{record_id}/actions/blueprint`), not settings-side Blueprint definition create/update. Design fallbacks with workflows + Deluge until Zoho exposes a definition endpoint. |
 | **Some org settings** | Teamspace, certain UI-only toggles, or API preview features may need a one-time UI action. The repo documents those in the relevant `docs/zoho/*.md` file. |
 
+### 4.0 Server-Side Stage Gates
+
+When Blueprint or Validation Rule definition APIs are unavailable, prefer **native workflow field updates** over Client Scripts for enforcement that must cover Kanban/API edits. Verified in this org:
+
+- Workflow criteria can match blank fields with `value: "${EMPTY}"`.
+- A workflow field update can roll `Deals.Stage` back to `Needs Analysis`.
+- `/settings/automation/field_updates` supports `module=Deals` and `feature_type=workflow`, but not the same name `filter` payload used by workflow rules. List and match by `name` locally.
+- Avoid rewriting existing workflow criteria unless necessary. `PUT /settings/automation/workflow_rules/{id}` can reject updates with duplicate criteria or condition-limit errors; create missing rules and treat existing rollback rules as current.
+- Client Scripts are useful for form UX, but they are not a hard gate for Kanban or API stage updates.
+
 ### 4.1 Developer Hub Client Scripts via Safari admin session
 
 Use this when a task needs **Client Script** creation/update and the public APIs return `INVALID_REQUEST_METHOD`, `EXPECTED_PARAM_MISSING`, or missing `metadata/code` errors.

@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -224,10 +225,19 @@ def _upsert_script(
     dry_run: bool,
 ) -> str | None:
     existing_id = None
+    existing_event_match = None
     for script in _list_scripts(session, api_domain, page_id):
         if (script.get("name") or "").strip() == name:
             existing_id = str(script["id"])
             break
+        existing_event = script.get("event_info") or {}
+        if (
+            existing_event.get("name") == event_info.get("name")
+            and existing_event.get("type") == event_info.get("type")
+        ):
+            existing_event_match = str(script["id"])
+    if not existing_id and existing_event_match:
+        existing_id = existing_event_match
 
     def body(source_key: str) -> dict[str, Any]:
         script = {
@@ -239,6 +249,21 @@ def _upsert_script(
             source_key: source,
         }
         return {"client_scripts": [script]}
+
+    def metadata_body() -> dict[str, Any]:
+        script = {
+            "name": name,
+            "description": description,
+            "client_script_page": {"id": page_id},
+            "event_info": event_info,
+            "state": "active",
+        }
+        if existing_id:
+            script["id"] = existing_id
+        return {"client_scripts": [script]}
+
+    def multipart_headers() -> dict[str, str]:
+        return {k: v for k, v in session.headers.items() if k.lower() != "content-type"}
 
     if dry_run:
         print(f"--- dry-run {'PUT' if existing_id else 'POST'} script {name!r} ---")
@@ -262,8 +287,201 @@ def _upsert_script(
                 return existing_id
         if r.status_code not in (400, 422):
             break
+    if "metadata" in last_text and "code" in last_text:
+        files = {
+            "code": ("deal_stage_field_visibility.js", source, "application/javascript"),
+        }
+        r = _crm(
+            session,
+            api_domain,
+            method,
+            path,
+            data={"metadata": json.dumps(metadata_body())},
+            files=files,
+            headers=multipart_headers(),
+        )
+        last_text = r.text or ""
+        if r.ok:
+            for item in r.json().get("client_scripts") or []:
+                details = item.get("details") or {}
+                if item.get("code") == "SUCCESS" and details.get("id"):
+                    return str(details["id"])
+                if item.get("id"):
+                    return str(item["id"])
+            if existing_id:
+                return existing_id
     print(f"  {method} client_scripts HTTP failed ({name}): {last_text[:5000]}", file=sys.stderr)
     return None
+
+
+def _safari_internal_upsert(source: str, dry_run: bool) -> bool:
+    """Use the logged-in Safari admin session and Zoho's internal cscript endpoints."""
+    if dry_run:
+        print("Dry run: would use Safari /crm/v2.2/settings/cscript_snippets fallback if public API fails.")
+        return True
+
+    def safari_js(script: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                "osascript",
+                "-e",
+                f'tell application "Safari" to do JavaScript {json.dumps(script)} in current tab of front window',
+            ],
+            text=True,
+            capture_output=True,
+            timeout=120,
+        )
+
+    # Load Zoho's async compiler dependency into ordinary CRM pages before compiling.
+    # `compile_script(...)` is async, but once this resource is loaded we can call AsyncAwait.compile synchronously.
+    preload = """
+(function(){
+  if (typeof AsyncAwait !== 'undefined') { return 'ready'; }
+  if (typeof Lyte === 'undefined' || !Lyte.injectResources || typeof networkUtils === 'undefined') {
+    return 'missing-loader';
+  }
+  Lyte.injectResources([networkUtils.returnDependencyFiles(['cscript/convert-to-asyncawait.js'], ResourceConstants.CRMClient)]);
+  return 'loading';
+})()
+"""
+    preload_proc = safari_js(preload)
+    if preload_proc.returncode != 0:
+        print(preload_proc.stderr[:4000], file=sys.stderr)
+        return False
+    for _ in range(20):
+        ready_proc = safari_js("typeof AsyncAwait !== 'undefined' ? 'ready' : 'loading'")
+        if ready_proc.returncode == 0 and ready_proc.stdout.strip() == "ready":
+            break
+        time.sleep(0.5)
+    else:
+        print("Safari cscript fallback failed: AsyncAwait compiler did not load.", file=sys.stderr)
+        return False
+
+    js = f"""
+(function(){{
+  try {{
+  var source = {json.dumps(source)};
+  var csrf = (document.cookie.match(/(?:^|; )crmcsr=([^;]+)/)||[])[1];
+  var org = (location.href.match(/org(\\d+)/)||[])[1];
+  if (!csrf || !org) {{
+    return JSON.stringify({{ok:false, error:'Missing Safari Zoho csrf/org context'}});
+  }}
+  function xhr(method, path, body) {{
+    var x = new XMLHttpRequest();
+    x.open(method, path, false);
+    x.setRequestHeader('X-ZCSRF-TOKEN', 'crmcsrfparam=' + csrf);
+    x.setRequestHeader('X-CRM-ORG', org);
+    if (body !== undefined) {{
+      x.setRequestHeader('Content-Type', 'application/json');
+    }}
+    x.send(body === undefined ? null : JSON.stringify(body));
+    if (x.status < 200 || x.status >= 300) {{
+      throw new Error(method + ' ' + path + ' HTTP ' + x.status + ': ' + x.responseText.slice(0, 1000));
+    }}
+    return x.responseText ? JSON.parse(x.responseText) : {{}};
+  }}
+  var compiled = AsyncAwait.compile(source + '\\n', {{
+    functionScope: true,
+    minify: false,
+    sourceFileName: Math.random().toString(36).substring(2,15) + '-client-script.js',
+    prefix: "'use strict';",
+    excludeList: ['log']
+  }});
+  if (compiled.error) {{
+    throw compiled.error;
+  }}
+  var pages = xhr('GET', '/crm/v2.2/settings/cscript_pages?include_extra_details=true').cscript_pages || [];
+  var wantedPages = {{
+    module_create: ['onLoad', 'onChange'],
+    module_edit: ['onLoad', 'onChange']
+  }};
+  var results = [];
+  pages.filter(function(page) {{
+    return page.selectors &&
+      page.selectors.Module &&
+      page.selectors.Layout &&
+      page.selectors.Module.value === 'Deals' &&
+      page.selectors.Layout.value === 'Standard' &&
+      wantedPages[page.definition_name];
+  }}).forEach(function(page) {{
+    var snippets = xhr('GET', '/crm/v2.2/settings/cscript_snippets?page_uuid=' + page.uuid).cscript_snippets || [];
+    wantedPages[page.definition_name].forEach(function(eventName) {{
+      var snippet = snippets.filter(function(item) {{
+        return item.script_event && item.script_event.event === eventName && item.script_event.type === 'page';
+      }})[0];
+      var content = {{
+        source_code: source,
+        async_code: compiled.code,
+        source_map: compiled.map
+      }};
+      if (!snippet) {{
+        var createBody = {{
+          cscript_snippets: [{{
+            name: 'Deal Stage ' + page.definition_name.replace('module_', '') + ' ' + eventName,
+            description: 'Show/hide Deal fields by Stage and block Proposal / Quote until discovery is complete.',
+            active: true,
+            cscript_page: {{
+              id: page.id,
+              uuid: page.uuid,
+              definition_name: page.definition_name
+            }},
+            script_event: {{
+              arguments: null,
+              type: 'page',
+              event: eventName
+            }},
+            content: content
+          }}]
+        }};
+        var createResp = xhr('POST', '/crm/v2.2/settings/cscript_snippets', createBody);
+        results.push({{
+          ok: true,
+          page: page.definition_name,
+          event: eventName,
+          id: ((createResp.cscript_snippets || [{{}}])[0].details || {{}}).id || ((createResp.cscript_snippets || [{{}}])[0].id),
+          response: createResp
+        }});
+        return;
+      }}
+      snippet.description = 'Show/hide Deal fields by Stage and block Proposal / Quote until discovery is complete.';
+      snippet.active = true;
+      snippet.content = content;
+      var resp = xhr('PUT', '/crm/v2.2/settings/cscript_snippets/' + snippet.uuid, {{cscript_snippets:[snippet]}});
+      results.push({{
+        ok: true,
+        page: page.definition_name,
+        event: eventName,
+        id: snippet.id,
+        uuid: snippet.uuid,
+        response: resp
+      }});
+    }});
+  }});
+  return JSON.stringify({{ok: results.length === 4 && results.every(function(r){{return r.ok;}}), results: results}});
+  }} catch (e) {{
+    return JSON.stringify({{ok:false, error: String(e && (e.message || e)), stack: String(e && e.stack || '')}});
+  }}
+}})()
+"""
+    proc = safari_js(js)
+    if proc.returncode != 0:
+        print(proc.stderr[:4000], file=sys.stderr)
+        return False
+    text = proc.stdout.strip()
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        print((text or "Safari cscript fallback returned empty output.")[:4000], file=sys.stderr)
+        return False
+    for result in payload.get("results") or []:
+        if result.get("ok"):
+            print(f"  Safari cscript updated: {result.get('page')} {result.get('event')} id={result.get('id')}")
+        else:
+            print(f"  Safari cscript failed: {result}", file=sys.stderr)
+    if not payload.get("ok"):
+        print(payload.get("error") or "Safari cscript fallback failed.", file=sys.stderr)
+        return False
+    return True
 
 
 def main() -> int:
@@ -346,11 +564,8 @@ def main() -> int:
             print(f"  Script: {script_name} (id={sid})")
 
     if not ok:
-        print(
-            "\nManual fallback: paste `artifacts/zoho/client_scripts/deal_stage_field_visibility.js` "
-            "into four Client Script rows (Deals Create/Edit × onLoad/onChange) — see script header.",
-            file=sys.stderr,
-        )
+        print("\nPublic client-script API failed; trying Safari admin-session fallback.")
+        ok = _safari_internal_upsert(source, args.dry_run)
     return 0 if ok else 1
 
 

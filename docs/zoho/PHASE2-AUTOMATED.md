@@ -54,7 +54,7 @@ Idempotent: re-run updates existing map dependency rows.
 1. **Lead conversion mapping** — confirm with **`make zoho-audit-lead-conversion`** (`audit_lead_conversion_mapping.py`). Zoho exposes per-field `convert_mapping` on **`GET /crm/v8/settings/fields?module=Leads`**; layouts include a **`convert_mapping`** block for the Deal layout used on convert. Change mappings in **Setup → Leads → Lead Conversion Mapping** if needed.
 
 2. **Stage–probability** for **Standard (Standard)** pipeline (§5 — UI recommended)  
-   `/settings/stages?module=Deals` (HTTP 200) returns stage rows with probability values (your **pipeline** may list 7 stages while older **picklist** options can still exist for legacy deals).
+   `/settings/stages?module=Deals` (HTTP 200) returns stage rows with probability values (your **pipeline** may list **6** stages while older **picklist** options can still exist for legacy deals).
    values. Zoho default values are already loaded (10 % → 100 %). Custom % can be set via
    `PUT /settings/stages/{stage_id}?module=Deals` — but this endpoint is undocumented in the
    main v8 public docs; test manually before scripting.

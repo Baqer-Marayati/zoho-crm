@@ -63,6 +63,6 @@ Reference CSV only: `picklists/lost_reason_missing_values.csv` (values were alig
 
 **Blueprint** process definition: UI is **Setup → Process Management → Blueprint**; public settings APIs here expose **record transition** execution (`/{module}/{id}/actions/blueprint`), not graph create/update — see `DEALS-QUOTES-PROCESS-PROVISIONING.md` attempt log.
 
-**Validation rules** (hard block on save): readable dependency metadata exists; create/update payload not used in this repo — post-save Deluge + workflows are the substitute.
+**Validation rules** (hard block on save): readable dependency metadata exists; create/update payload not used in this repo — native workflow rollback rules are the current substitute for Proposal / Quote.
 
-The function-backed `deal_stage_gate_guard` is the prepared enforcement substitute for Blueprint-style gates.
+`deal_stage_gate_guard` remains a prepared/supplementary enforcement function, but the current live Proposal / Quote gate should be the native workflow rollback rules from `provision_deals_quotes_process.py` unless the workflow function wrapper has a verified `dealId` argument mapping.

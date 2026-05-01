@@ -31,21 +31,20 @@ The stakeholder wants **full automation** (no clicking in Zoho Setup).
 - **Low admin** for sales: prefer **auto-created tasks** over blocking “next activity” requirements.
 - **No manager approval** and **no technical approval** before quote.
 - **Deal Amount** is **manually** maintained on the Deal (not auto-synced from Quote); nudge consistency via workflows if useful.
-- **Quote Sent** means **Quote exists in Zoho** (created), not necessarily emailed yet; **Negotiation** requires evidence the customer received **at least one** quote option.
+- **Proposal / Quote** means **solution is being finalized and a formal Quote exists in Zoho** (created), not necessarily emailed yet; **Negotiation** requires evidence the customer received **at least one** quote option.
 
 ---
 
 ## 2) Pipeline stages (must match picklist + `pipelines_seed.json`)
 
-Unified **Standard (Standard)** pipeline; **7** stages in order:
+Unified **Standard (Standard)** pipeline; **6** stages in order:
 
 1. Qualification  
 2. Needs Analysis  
-3. Solution / Value  
-4. Quote Sent  
-5. Negotiation  
-6. Closed Won  
-7. Closed Lost  
+3. Proposal / Quote  
+4. Negotiation  
+5. Closed Won  
+6. Closed Lost  
 
 Source: `tools/zoho/pipelines_seed.json`, `docs/zoho/SALES-PIPELINE-AND-STAGES.md`.
 
@@ -59,9 +58,9 @@ Source: `tools/zoho/pipelines_seed.json`, `docs/zoho/SALES-PIPELINE-AND-STAGES.m
 |-------|----------|
 | Quote source | **Zoho Quotes** module (official). |
 | Multiple quotes | **A/B options**; Deal has **Primary Quote** (lookup). |
-| Quote Sent meaning | Stage when quote **exists in Zoho** (created). |
-| Negotiation entry | When **active discussion** on price/terms/etc. — **not** only after formal customer reply. |
-| Gate into Negotiation | Keep stage **Quote Sent**; add per-**Quote** checkbox **`Quote shared with customer`**. **Negotiation** allowed only if **≥1 Quote linked to the Deal** has this checkbox **true** (any linked quote, not Primary-only). |
+| Proposal / Quote meaning | Deal is in **solution + formal quote** motion: at least one **Quote** record exists in Zoho; Primary Quote set when multiple options. |
+| Negotiation entry | When **active discussion** on price/terms/etc. — **not** only after formal customer reply; requires **shared** flag (below). |
+| Gate into Negotiation | Deal remains **Proposal / Quote** until rep moves forward; per-**Quote** checkbox **`Quote shared with customer`**. **Negotiation** allowed only if **≥1 Quote linked to the Deal** has this checkbox **true** (any linked quote, not Primary-only). |
 | Evidence of share | **Checkbox only** on Quote (no date/channel). |
 | Who sets “shared” | **Quote Owner only** (verify Quote profile permissions). |
 
@@ -71,7 +70,7 @@ Source: `tools/zoho/pipelines_seed.json`, `docs/zoho/SALES-PIPELINE-AND-STAGES.m
 |-------|----------|
 | Discovery location | **Structured fields on Deal** (not Lead). |
 | Strictness | **Moderate:** required summary + key fields **before formal quoting**, not ultra-heavy checklist. |
-| Minimum before Quote Sent | **Discovery summary**, **Current machines/setup**, **Applications**, **Budget/financing status**. |
+| Minimum before Proposal / Quote is valid (guard + rep hygiene) | **Discovery summary**, **Current machines/setup**, **Applications**, **Budget/financing status** + **Amount** + **≥1 linked Quote** + **Primary Quote**. In the current org, the reliable API-driven enforcement is native workflow rollback rules (`Deal gate rollback - Proposal ...`) that return Stage to **Needs Analysis** when required Deal fields are blank; do not rely on the `deal_stage_gate_guard` workflow wrapper for this gate unless its `dealId` argument mapping is proven fixed. |
 | Repeat customers | **Rare** — no special “fast path” required. |
 
 ### 3.3 Activities
@@ -84,7 +83,7 @@ Source: `tools/zoho/pipelines_seed.json`, `docs/zoho/SALES-PIPELINE-AND-STAGES.m
 
 | Topic | Decision |
 |-------|----------|
-| After Quote Sent | First follow-up task **+2 days**. |
+| After entering Proposal / Quote | Follow-up task **+3 days** (combined “finalize quote + follow up” — see `provision_deals_quotes_process.py`). |
 | Stale open deals | Reminder if **no stage change** and **no logged activity** for **14 days** (see §6.2 — implement as close as Zoho allows; may need “Last meaningful touch” field + workflows). |
 
 ### 3.5 Closed Won
@@ -119,7 +118,7 @@ Source: `tools/zoho/pipelines_seed.json`, `docs/zoho/SALES-PIPELINE-AND-STAGES.m
 
 | Topic | Decision |
 |-------|----------|
-| Deal Amount | **Required before Quote Sent** (enforce on transition **Solution / Value → Quote Sent** or equivalent validation on stage + Amount). |
+| Deal Amount | **Required while Stage = Proposal / Quote** (together with linked Quotes + Primary Quote); enforced by the server-side Proposal rollback workflows in `provision_deals_quotes_process.py`. |
 
 ---
 
@@ -131,7 +130,7 @@ Implement idempotent provisioning (new script or extend `provision_phase2_fields
 
 | Label (UI) | Type | Purpose |
 |------------|------|---------|
-| Discovery summary | Multi-line | Required before Quote Sent (with other discovery fields). |
+| Discovery summary | Multi-line | Required for **Proposal / Quote** stage validity (with other discovery fields). |
 | Current machines / setup | Multi-line | Discovery. |
 | Applications | Multi-line (or picklist later) | What they print / want to print. |
 | Budget / financing status | Picklist | e.g. Unknown, Rough range, Firm, Financing needed, Tender, … |
@@ -188,8 +187,7 @@ Follow payload patterns in `tools/zoho/provision_quoted_line_machine_sku_workflo
 |---------------|---------------------------|------------|
 | Qualification | Schedule discovery / confirm opportunity | +2 days |
 | Needs Analysis | Complete discovery fields on Deal | +3 days |
-| Solution / Value | Finalize configuration; create Quote(s); set Primary Quote | +5 days |
-| Quote Sent | Follow up on quote | **+2 days** |
+| Proposal / Quote | Finalize proposal; create Quote(s); set Primary Quote; follow up | +3 days |
 | Negotiation | Confirm decision timeline; address objections | +3 days |
 | Closed Won | Handoff / delivery kickoff | +1 day |
 | Closed Lost | If Next try date set — create task on that date (or single task “Revisit on …”) | per field |
@@ -227,7 +225,7 @@ If **Blueprint definition** is API-automatable, implement this graph; otherwise 
 
 ### 7.1 Allowed transitions
 
-- Full forward path + **rollbacks** (e.g. Negotiation → Quote Sent) with **optional** rollback reason field (stakeholder did not require — skip v1 unless trivial).
+- Full forward path + **rollbacks** (e.g. Negotiation → **Proposal / Quote**) with **optional** rollback reason field (stakeholder did not require — skip v1 unless trivial).
 - **Closed Lost** from any **open** stage.
 
 ### 7.2 Mandatory fields per transition
@@ -235,9 +233,9 @@ If **Blueprint definition** is API-automatable, implement this graph; otherwise 
 | Transition | Mandatory before transition |
 |------------|----------------------------|
 | **Qualification → Needs Analysis** | Light: e.g. **Line of business** if not already mandatory; optional short note (stakeholder: keep light). |
-| **Needs Analysis → Solution / Value** | **Discovery summary**, **Current machines**, **Applications**, **Budget/financing**. |
-| **Solution / Value → Quote Sent** | All **Needs Analysis → Solution / Value** fields + **Deal Amount** filled + **≥1 Quote** linked to Deal + **Primary Quote** set. |
-| **Quote Sent → Negotiation** | Deal **`Any quote shared with customer` = true** (rollup from any linked Quote). **No** extra “negotiation topic” field required. |
+| **Needs Analysis → Proposal / Quote** | **Discovery summary**, **Current machines**, **Applications**, **Budget/financing** (same as prior Needs Analysis → Solution / Value). |
+| **Entering / staying in Proposal / Quote** | Above discovery fields + **Deal Amount** + **≥1 Quote** linked to Deal + **Primary Quote** set (merges prior Solution/Value + Quote Sent gates). |
+| **Proposal / Quote → Negotiation** | Deal **`Any quote shared with customer` = true** (rollup from any linked Quote). **No** extra “negotiation topic” field required. |
 | **Negotiation → Closed Won** | **Won / handoff notes**. |
 | **Any open → Closed Lost** | **Lost Reason**; **Competitor** if reason is **competitive** or **Price**; **Next try date** if reason ∈ {Timing, Budget, No decision, Project paused, Tender future opportunity} (exact picklist mapping required). |
 

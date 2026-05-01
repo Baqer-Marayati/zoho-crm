@@ -5,6 +5,7 @@ Long-form prompts and blueprints that are meant to be **copied into a Cursor age
 | File | Purpose |
 |------|---------|
 | [`AGENT-PROMPT-DEALS-DELUGE-FUNCTIONS.md`](./AGENT-PROMPT-DEALS-DELUGE-FUNCTIONS.md) | End-to-end checklist: provision Deluge functions + function-backed workflow rules via `tools/zoho` + official Zoho CRM MCPs |
+| [`AGENT-PROMPT-NEEDS-ANALYSIS-GUIDANCE-AND-GATES.md`](./AGENT-PROMPT-NEEDS-ANALYSIS-GUIDANCE-AND-GATES.md) | Paste-ready agent brief: Needs Analysis soft guidance (workflows/reminders/optional Client Script) + Proposal/Quote hard gates (Blueprint/validation/guard), Safari Apple Events path when settings API lacks Blueprint definition |
 | [`AGENT-HANDOFF-DEALS-BLUEPRINT-WORKFLOWS.md`](./AGENT-HANDOFF-DEALS-BLUEPRINT-WORKFLOWS.md) | Business and technical spec: Deal/Quote fields, stage motion, optional Blueprint vs workflow/Deluge substitutes |
 
 **Operational truth** for what is deployed and how to re-run it lives in [`../DEALS-QUOTES-PROCESS-PROVISIONING.md`](../DEALS-QUOTES-PROCESS-PROVISIONING.md) and `make zoho-deals-quotes-process`.

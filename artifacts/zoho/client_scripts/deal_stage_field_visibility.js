@@ -15,8 +15,7 @@ var __DEAL_STAGE_API = "Stage";
 
 var __STAGE_QUALIFICATION = "Qualification";
 var __STAGE_NEEDS_ANALYSIS = "Needs Analysis";
-var __STAGE_SOLUTION = "Solution / Value";
-var __STAGE_QUOTE_SENT = "Quote Sent";
+var __STAGE_PROPOSAL_QUOTE = "Proposal / Quote";
 var __STAGE_NEGOTIATION = "Negotiation";
 var __STAGE_CLOSED_WON = "Closed Won";
 var __STAGE_CLOSED_LOST = "Closed Lost";
@@ -42,6 +41,13 @@ var __FIELDS_WON_NOTES = ["Won_handoff_notes"];
 
 /** Outcome - both APIs may exist in the same org (legacy + custom). */
 var __FIELDS_LOST = ["Lost_Reason", "Reason_For_Loss__s"];
+
+var __DISCOVERY_GATE_FIELDS = [
+  { api: "Discovery_summary", label: "Discovery summary" },
+  { api: "Current_machines_setup", label: "Current machines / setup" },
+  { api: "Applications", label: "Applications" },
+  { api: "Budget_financing_status", label: "Budget / financing status" }
+];
 
 function __dealStageLabel() {
   if (typeof ZDK === "undefined" || !ZDK.Page) {
@@ -78,8 +84,7 @@ function __dealIndexOfStage(label) {
   var order = [
     __STAGE_QUALIFICATION,
     __STAGE_NEEDS_ANALYSIS,
-    __STAGE_SOLUTION,
-    __STAGE_QUOTE_SENT,
+    __STAGE_PROPOSAL_QUOTE,
     __STAGE_NEGOTIATION,
     __STAGE_CLOSED_WON,
     __STAGE_CLOSED_LOST
@@ -118,6 +123,88 @@ function __dealSetFieldVisible(apiName, visible) {
   } catch (e2) {}
 }
 
+function __dealFieldValue(apiName) {
+  if (typeof ZDK === "undefined" || !ZDK.Page) {
+    return "";
+  }
+  var f;
+  try {
+    f = ZDK.Page.getField(apiName);
+  } catch (e0) {
+    return "";
+  }
+  if (!f) {
+    return "";
+  }
+  var v;
+  try {
+    v = f.getValue();
+  } catch (e1) {
+    return "";
+  }
+  if (v == null || v === undefined) {
+    return "";
+  }
+  if (typeof v === "string") {
+    return v.trim();
+  }
+  if (typeof v === "object") {
+    if (v.name) {
+      return String(v.name).trim();
+    }
+    if (v.display_value) {
+      return String(v.display_value).trim();
+    }
+    if (v.id) {
+      return String(v.id).trim();
+    }
+  }
+  return String(v).trim();
+}
+
+function __dealSetFieldValue(apiName, value) {
+  if (typeof ZDK === "undefined" || !ZDK.Page) {
+    return;
+  }
+  var f;
+  try {
+    f = ZDK.Page.getField(apiName);
+  } catch (e0) {
+    return;
+  }
+  if (!f) {
+    return;
+  }
+  try {
+    if (typeof f.setValue === "function") {
+      f.setValue(value);
+    }
+  } catch (e1) {}
+}
+
+function __dealMissingDiscoveryFields() {
+  var missing = [];
+  __dealEach(__DISCOVERY_GATE_FIELDS, function (item) {
+    var value = __dealFieldValue(item.api);
+    if (!value || value === "-None-") {
+      missing.push(item.label + " (" + item.api + ")");
+    }
+  });
+  return missing;
+}
+
+function __dealShowError(message) {
+  try {
+    if (typeof ZDK !== "undefined" && ZDK.Client && ZDK.Client.showMessage) {
+      ZDK.Client.showMessage(message, { type: "error" });
+      return;
+    }
+  } catch (e0) {}
+  try {
+    alert(message);
+  } catch (e1) {}
+}
+
 function __dealEach(arr, fn) {
   for (var i = 0; i < arr.length; i++) {
     fn(arr[i]);
@@ -132,8 +219,8 @@ function __dealApplyStageVisibility() {
   var isClosedLost =
     label.indexOf("Closed Lost") >= 0 || label === __STAGE_CLOSED_LOST;
   var isClosedWon = label === __STAGE_CLOSED_WON;
-  var quoteIdx = __dealIndexOfStage(__STAGE_QUOTE_SENT);
-  var inQuotePhase = idx >= quoteIdx && quoteIdx >= 0;
+  var proposalQuoteIdx = __dealIndexOfStage(__STAGE_PROPOSAL_QUOTE);
+  var inQuotePhase = idx >= proposalQuoteIdx && proposalQuoteIdx >= 0;
   var negotiationOrWon =
     label === __STAGE_NEGOTIATION || isClosedWon;
 
@@ -155,3 +242,16 @@ function __dealApplyStageVisibility() {
 }
 
 __dealApplyStageVisibility();
+
+if (__dealStageLabel() === __STAGE_PROPOSAL_QUOTE) {
+  var __missingDiscovery = __dealMissingDiscoveryFields();
+  if (__missingDiscovery.length > 0) {
+    __dealShowError(
+      "Proposal / Quote is blocked until these discovery fields are complete:\n- " +
+        __missingDiscovery.join("\n- ") +
+        "\n\nBudget / financing status must be a picklist choice."
+    );
+    __dealSetFieldValue(__DEAL_STAGE_API, __STAGE_NEEDS_ANALYSIS);
+    return false;
+  }
+}
